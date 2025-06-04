@@ -23,6 +23,4 @@ public class AuthResponse {
 	private String userEmail;
 	private String firstName;
 	private String lastName;
-	@Enumerated(EnumType.STRING)
-	private UserRoles role;
 }

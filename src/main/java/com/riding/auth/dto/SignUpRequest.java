@@ -31,8 +31,6 @@ public class SignUpRequest {
 	private String mobile;
 	private String password;
 	@Enumerated(EnumType.STRING)
-	private UserRoles userRole;
-	@Enumerated(EnumType.STRING)
 	private AuthProvider provider;
 	@JsonIgnore
 	private String imageUrl;

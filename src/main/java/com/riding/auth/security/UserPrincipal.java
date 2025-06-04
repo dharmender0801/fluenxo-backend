@@ -43,7 +43,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
 	public UserPrincipal(Long id, String mobile, String email, String password,
 			Collection<? extends GrantedAuthority> authorities, String account, String firstName, String lastName,
-			String gender, Boolean isOtp, String otp, User user, Long userRoleId) {
+			String gender, Boolean isOtp, String otp, User user) {
 		this.id = id;
 		this.mobile = mobile;
 		this.email = email;
@@ -56,7 +56,6 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		this.isOtp = isOtp;
 		this.otp = otp;
 		this.user = user;
-		this.userRoleId = userRoleId;
 	}
 
 	public static UserPrincipal create(User user) {
@@ -65,7 +64,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		List<GrantedAuthority> authorities = Collections.singletonList(grantAuthority);
 		return new UserPrincipal(user.getId(), user.getMobile(), user.getEmail(), user.getPassword(), authorities,
 				user.getAccount(), user.getFirstName(), user.getLastName(), user.getGender(), user.getIsOtp(),
-				user.getOtp(), user, user.getUserRoleId());
+				user.getOtp(), user);
 	}
 
 	public String getMobile() {

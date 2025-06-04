@@ -2,7 +2,6 @@ package com.riding.auth.model;
 
 import com.riding.auth.model.audit.UserDateAudit;
 import com.riding.auth.model.enums.AuthProvider;
-import com.riding.auth.model.enums.UserRoles;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,8 +38,6 @@ public class User extends UserDateAudit {
 	private String fcmToken;
 	@Column(name = "account")
 	private String account;
-	@Column(name = "user_role_id")
-	private Long userRoleId;
 	@Column(name = "user_name")
 	private String userName;
 	@Column(name = "password")
