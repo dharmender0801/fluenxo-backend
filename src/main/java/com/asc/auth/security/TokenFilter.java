@@ -72,17 +72,16 @@ public class TokenFilter extends OncePerRequestFilter {
 		userId = tokenProvider.extractUserName(jwt);
 		if (!StringUtils.isEmpty(userId) && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = userService.loadUserByUserId(Long.valueOf(userId));
+			log.info("User Detal : {} ", userDetails);
 			setUserId(Long.valueOf(userId));
-			if (tokenProvider.isTokenValid(jwt, userDetails)) {
+			if (tokenProvider.validateToken(jwt)) {
 				SecurityContext context = SecurityContextHolder.createEmptyContext();
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 						null, userDetails.getAuthorities());
 				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				context.setAuthentication(authToken);
 				SecurityContextHolder.setContext(context);
-
 			} else {
-
 			}
 		}
 		filterChain.doFilter(request, response);

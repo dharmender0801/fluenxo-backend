@@ -21,11 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
-@RequestMapping("/auth")
+@RequestMapping("/validate")
 public class ValidationController {
 
 	@GetMapping(path = "/user", produces = "application/json")
-	@PreAuthorize("hasAnyRole(@rolesBean.allRoles())")
 	public ResponseEntity<RestResponse<UserPrincipal>> validateUser(
 			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
 			@RequestHeader(name = Constants.APP_VERSION) String appVersion, @CurrentUser UserPrincipal userPrincipal) {

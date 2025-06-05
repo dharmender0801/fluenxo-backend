@@ -30,7 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 //	Optional<List<User>> findAllByCenterCodeAndUserRole(String centerCode, Integer roleUser);
 
-	Optional<User> findByAccount(String apiKey);
+//	Optional<User> findByAccount(String apiKey);
 
 	Page<User> findAll(Specification<?> build, Pageable pageable);
 
