@@ -1,13 +1,10 @@
 pipeline {
     agent any
-    triggers {
-        pollSCM 'H * * * *'
-    }
     stages {
         stage('Build') {
             steps {
                script{
-                    echo 'Pulling...' + env.BRANCH_NAME
+                    echo 'Pulling...'
                     sh 'mvn clean install -DskipTests'
                }
             }
@@ -15,10 +12,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script{
-                    sh 'pwd'
-                    sh 'cd target/'
-                    sh 'ls -lrth'
-                    sh 'mv target/auth-service.war /opt/tomcat/webapps/'
+                     sh 'sshpass -e -v scp -o StrictHostKeyChecking=no  target/lms-auth-service.war jenkins@pms-dev.apollosupplychain.com:/opt/docker/pms-dev/tomcat/webapps/'
                 }
             }
         }

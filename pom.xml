@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -11,10 +11,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>user-service</groupId>
-	<artifactId>auth-service</artifactId>
+	<artifactId>lms-auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>auth-service</name>
-	<description>Riding Auth Service</description>
+	<name>lms-auth-service</name>
+	<description>Lms Auth Service</description>
 	<url />
 	<licenses>
 		<license />
@@ -115,7 +115,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>auth-service</finalName>
+		<finalName>lms-auth-service</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
