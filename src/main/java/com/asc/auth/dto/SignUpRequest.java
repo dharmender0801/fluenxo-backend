@@ -49,4 +49,5 @@ public class SignUpRequest {
 	private String pinCode;
 	private String latitude;
 	private String longitude;
+	private UserRoles role;
 }

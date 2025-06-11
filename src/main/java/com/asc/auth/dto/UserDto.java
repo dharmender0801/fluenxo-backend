@@ -28,7 +28,7 @@ public class UserDto {
 	private String fcmToken;
 	private String account;
 	@Enumerated(EnumType.STRING)
-	private UserRoles userRole;
+	private UserRoles role;
 	private String userName;
 	@JsonIgnore
 	private String password;
