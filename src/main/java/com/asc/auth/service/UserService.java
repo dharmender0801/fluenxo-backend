@@ -95,6 +95,7 @@ public class UserService implements UserDetailsService {
 						: "123456"));
 		user.setMobileVerified(false);
 		user.setEmailVerified(false);
+		user.setRole(requestUser.getRole());
 		User result = userRepository.save(user);
 		return result;
 	}
