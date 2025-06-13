@@ -107,7 +107,7 @@ public class AuthController {
 			auth.setUserEmail(userPrincipal.getEmail());
 			auth.setFirstName(userPrincipal.getFirstName());
 			auth.setLastName(userPrincipal.getLastName());
-			auth.setRoleName(userPrincipal.getUserRole().name());
+			auth.setRole(userPrincipal.getUserRole());
 			auth.setTokenType("Bearer");
 			return (Boolean.TRUE.equals(Objects.nonNull(token)))
 					? RestUtils.successResponse(auth, Constants.SUCCESS, HttpStatus.OK)
