@@ -1,13 +1,8 @@
 package com.asc.auth.config;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,11 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -40,7 +34,7 @@ import com.asc.auth.service.UserService;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
-public class SecurityConfig implements WebMvcConfigurer {
+public class SecurityConfig {
 
 	@Autowired
 	private UserService userService;
@@ -53,25 +47,14 @@ public class SecurityConfig implements WebMvcConfigurer {
 	@Autowired
 	OAuth2AuthenticationFailureHandler auth2AuthenticationFailureHandler;
 
-	private List<String> allowedOrigins = Arrays.asList("capacitor://localhost", "ionic://localhost",
-			"https://localhost", "http://localhost:9090", "http://localhost:3000", "http://localhost:4200",
-			"https://wms-dev.goalfa.in", "https://wms.goalfa.in", "https://alfa.goalfa.in",
-			"https://wms-dev.apollosupplychain.com", "https://wms.apollosupplychain.com",
-			"https://havells.apollosupplychain.com", "https://beta.apollosupplychain.com",
-			"https://ptl.apollosupplychain.com", "https://dev.apollosupplychain.com",
-			"https://uat.apollosupplychain.com", "https://ems.apollosupplychain.com",
-			"https://ems-dev.apollosupplychain.com", "https://pms.apollosupplychain.com",
-			"https://pms-dev.apollosupplychain.com", "https://dev.drinkxtcy.com", "https://mission.drinkxtcy.com",
-			"https://lms-dev.apollosupplychain.com");
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable)
 
 				.authorizeHttpRequests(
 						request -> request
-								.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
-										"/swagger-ui/**", "/webjars/**", "/csrf**/**", "/templates/**", "/index.html**",
+								.requestMatchers("/v3/api-docs/**",   "/swagger-ui.html", "/swagger-resources/**", "/swagger-ui/**",
+										"/webjars/**", "/csrf**/**", "/templates/**", "/index.html**",
 										"/configuration/ui", "/configuration/security", "/auth/**", "/login/**",
 										"/oauth2/**", "/oauth2/authorization/**")
 								.permitAll().anyRequest().authenticated())
@@ -84,7 +67,7 @@ public class SecurityConfig implements WebMvcConfigurer {
 						.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
 								.oidcUserService(customOidcUserService))
 						.successHandler(oAuth2LoginSuccessHandler).failureUrl("/auth/oauth-failure"))
-//				.addFilterAfter(corsFilter(), BasicAuthenticationFilter.class)
+				.addFilterAfter(corsFilter(), BasicAuthenticationFilter.class)
 				.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(exception -> exception
 						.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
@@ -102,11 +85,11 @@ public class SecurityConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	FilterRegistrationBean<CorsFilter> corsFilter() {
+	CorsFilter corsFilter() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
-		allowedOrigins.forEach(config::addAllowedOrigin);
-		config.setAllowCredentials(true);
+		config.setAllowCredentials(false);
+		config.addAllowedOrigin("*");
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
 		config.addExposedHeader("Authorization");
@@ -116,18 +99,9 @@ public class SecurityConfig implements WebMvcConfigurer {
 		config.addExposedHeader("Device-Type");
 		config.addExposedHeader("VER");
 		config.addExposedHeader("AppVersionNo");
-		config.setMaxAge(3600L);
+		config.setMaxAge(1L);
 		source.registerCorsConfiguration("/**", config);
-		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
-		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		return bean;
-	}
-
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins(allowedOrigins.toArray(new String[0]))
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH").allowedHeaders("*")
-				.exposedHeaders("Authorization", "X-AUTH-TOKEN");
+		return new CorsFilter(source);
 	}
 
 	@Bean
