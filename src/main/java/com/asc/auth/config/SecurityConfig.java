@@ -53,8 +53,8 @@ public class SecurityConfig {
 
 				.authorizeHttpRequests(
 						request -> request
-								.requestMatchers("/v3/api-docs/**",   "/swagger-ui.html", "/swagger-resources/**", "/swagger-ui/**",
-										"/webjars/**", "/csrf**/**", "/templates/**", "/index.html**",
+								.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
+										"/swagger-ui/**", "/webjars/**", "/csrf**/**", "/templates/**", "/index.html**",
 										"/configuration/ui", "/configuration/security", "/auth/**", "/login/**",
 										"/oauth2/**", "/oauth2/authorization/**")
 								.permitAll().anyRequest().authenticated())
@@ -67,7 +67,7 @@ public class SecurityConfig {
 						.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
 								.oidcUserService(customOidcUserService))
 						.successHandler(oAuth2LoginSuccessHandler).failureUrl("/auth/oauth-failure"))
-				.addFilterAfter(corsFilter(), BasicAuthenticationFilter.class)
+//				.addFilterAfter(corsFilter(), BasicAuthenticationFilter.class)
 				.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(exception -> exception
 						.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
@@ -84,25 +84,25 @@ public class SecurityConfig {
 		return new HttpCookieOAuth2AuthorizationRequestRepository();
 	}
 
-	@Bean
-	CorsFilter corsFilter() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(false);
-		config.addAllowedOrigin("*");
-		config.addAllowedHeader("*");
-		config.addAllowedMethod("*");
-		config.addExposedHeader("Authorization");
-		config.addExposedHeader("Content-Type");
-		config.addExposedHeader("X-AUTH-TOKEN");
-		config.addExposedHeader("AUTH-TOKEN");
-		config.addExposedHeader("Device-Type");
-		config.addExposedHeader("VER");
-		config.addExposedHeader("AppVersionNo");
-		config.setMaxAge(1L);
-		source.registerCorsConfiguration("/**", config);
-		return new CorsFilter(source);
-	}
+//	@Bean
+//	CorsFilter corsFilter() {
+//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//		CorsConfiguration config = new CorsConfiguration();
+//		config.setAllowCredentials(false);
+//		config.addAllowedOrigin("*");
+//		config.addAllowedHeader("*");
+//		config.addAllowedMethod("*");
+//		config.addExposedHeader("Authorization");
+//		config.addExposedHeader("Content-Type");
+//		config.addExposedHeader("X-AUTH-TOKEN");
+//		config.addExposedHeader("AUTH-TOKEN");
+//		config.addExposedHeader("Device-Type");
+//		config.addExposedHeader("VER");
+//		config.addExposedHeader("AppVersionNo");
+//		config.setMaxAge(1L);
+//		source.registerCorsConfiguration("/**", config);
+//		return new CorsFilter(source);
+//	}
 
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
