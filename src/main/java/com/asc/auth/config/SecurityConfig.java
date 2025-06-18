@@ -1,5 +1,8 @@
 package com.asc.auth.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -47,10 +49,19 @@ public class SecurityConfig {
 	@Autowired
 	OAuth2AuthenticationFailureHandler auth2AuthenticationFailureHandler;
 
+	private List<String> allowedOrigins = Arrays.asList("capacitor://localhost", "ionic://localhost",
+			"https://localhost", "http://localhost:9090", "http://localhost:3000", "http://localhost:4200",
+			"https://wms-dev.goalfa.in", "https://wms.goalfa.in", "https://alfa.goalfa.in",
+			"https://wms-dev.apollosupplychain.com", "https://wms.apollosupplychain.com",
+			"https://havells.apollosupplychain.com", "https://beta.apollosupplychain.com",
+			"https://ptl.apollosupplychain.com", "https://dev.apollosupplychain.com",
+			"https://uat.apollosupplychain.com", "https://ems.apollosupplychain.com",
+			"https://ems-dev.apollosupplychain.com", "https://pms.apollosupplychain.com",
+			"https://lms-dev.apollosupplychain.com", "https://dev.drinkxtcy.com", "https://mission.drinkxtcy.com");
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(AbstractHttpConfigurer::disable)
-
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(
 						request -> request
 								.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
@@ -67,7 +78,6 @@ public class SecurityConfig {
 						.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
 								.oidcUserService(customOidcUserService))
 						.successHandler(oAuth2LoginSuccessHandler).failureUrl("/auth/oauth-failure"))
-//				.addFilterAfter(corsFilter(), BasicAuthenticationFilter.class)
 				.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(exception -> exception
 						.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
@@ -84,25 +94,24 @@ public class SecurityConfig {
 		return new HttpCookieOAuth2AuthorizationRequestRepository();
 	}
 
-//	@Bean
-//	CorsFilter corsFilter() {
-//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//		CorsConfiguration config = new CorsConfiguration();
-//		config.setAllowCredentials(false);
-//		config.addAllowedOrigin("*");
-//		config.addAllowedHeader("*");
-//		config.addAllowedMethod("*");
-//		config.addExposedHeader("Authorization");
-//		config.addExposedHeader("Content-Type");
-//		config.addExposedHeader("X-AUTH-TOKEN");
-//		config.addExposedHeader("AUTH-TOKEN");
-//		config.addExposedHeader("Device-Type");
-//		config.addExposedHeader("VER");
-//		config.addExposedHeader("AppVersionNo");
-//		config.setMaxAge(1L);
-//		source.registerCorsConfiguration("/**", config);
-//		return new CorsFilter(source);
-//	}
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(allowedOrigins);
+		config.setAllowCredentials(true);
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
+		config.addExposedHeader("Authorization");
+		config.addExposedHeader("Content-Type");
+		config.addExposedHeader("X-AUTH-TOKEN");
+		config.addExposedHeader("AUTH-TOKEN");
+		config.addExposedHeader("Device-Type");
+		config.addExposedHeader("VER");
+		config.addExposedHeader("AppVersionNo");
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
 
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
