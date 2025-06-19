@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,9 +13,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.asc.auth.dto.SignUpRequest;
+import com.asc.auth.dto.UserInfoDto;
+import com.asc.auth.exception.ResourceNotFoundException;
 import com.asc.auth.model.User;
 import com.asc.auth.repository.UserRepository;
 import com.asc.auth.security.UserPrincipal;
+import com.asc.auth.utils.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,6 +112,16 @@ public class UserService implements UserDetailsService {
 
 	public Optional<User> findByEmail(String email) {
 		return userRepository.findByEmail(email);
+	}
+
+	@Cacheable(value = "userInfoDetails", key = "#id")
+	public UserInfoDto getUserInfo(Long id) {
+		log.info("User id to be checked from DB is: {}", id);
+		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+		log.info("User received from db: {}", user);
+		UserInfoDto userDto = new UserInfoDto();
+		Utils.copyProperties(user, userDto);
+		return userDto;
 	}
 
 }
