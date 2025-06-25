@@ -22,4 +22,5 @@ public class AuthResponse {
 	private String firstName;
 	private String lastName;
 	private UserRoles role;
+	private Integer otp;
 }

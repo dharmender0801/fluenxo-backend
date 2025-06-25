@@ -57,4 +57,5 @@ public class UserDto {
 	private Boolean mobileVerified;
 	private Boolean emailVerified;
 	private String bearerToken;
+	private Integer otp;
 }

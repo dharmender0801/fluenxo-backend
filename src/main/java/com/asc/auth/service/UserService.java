@@ -6,6 +6,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,10 +18,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.asc.auth.dto.SignUpRequest;
+import com.asc.auth.dto.UserDto;
 import com.asc.auth.dto.UserInfoDto;
 import com.asc.auth.exception.ResourceNotFoundException;
 import com.asc.auth.model.User;
+import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.repository.UserRepository;
+import com.asc.auth.security.TokenProvider;
 import com.asc.auth.security.UserPrincipal;
 import com.asc.auth.utils.Utils;
 
@@ -31,6 +39,16 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	@Lazy
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	@Lazy
+	private OTPService otpService;
+	@Autowired
+	@Lazy
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	TokenProvider tokenProvider;
 
 	@Override
 	public UserDetails loadUserByUsername(String emailOrUserName) throws UsernameNotFoundException {
@@ -124,4 +142,54 @@ public class UserService implements UserDetailsService {
 		return userDto;
 	}
 
+	public UserDto verifyOtp(Integer otp, Long userID, AuthProvider channel) {
+		UserDto userInfo = null;
+		User user = userRepository.findById(userID)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userID));
+		log.debug("Channel: {},user.getMobileVerified(): {}, user.getEmailVerified(): {} ", channel,
+				user.getMobileVerified(), user.getEmailVerified());
+		if (otp >= 0 && ((Boolean.FALSE.equals(user.getMobileVerified())) && channel.equals(AuthProvider.mobile))
+				|| (Boolean.FALSE.equals(user.getEmailVerified())) && channel.equals(AuthProvider.email)) {
+			Integer serverOtp = otpService.getOtp(userID);
+			log.debug("Retrived OTP: {}, Received OTP: {}", serverOtp, otp);
+			if (serverOtp > 0) {
+				log.debug("Boolean.TRUE.equals({}.compareTo({}): {})", otp, serverOtp, otp.compareTo(serverOtp));
+				if (Boolean.TRUE.equals(otp.compareTo(serverOtp) == 0)) {
+					user = validateMobile(userID);
+					Authentication authentication = null;
+					try {
+						authentication = authenticationManager
+								.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), otp));
+						SecurityContextHolder.getContext().setAuthentication(authentication);
+						String token = tokenProvider.createToken(authentication);
+						userInfo = new UserDto();
+						Utils.copyProperties(user, userInfo);
+						log.info("Updating the user in DB also");
+						Utils.copyProperties(userInfo, user);
+						user = userRepository.save(user);
+						Utils.copyProperties(user, userInfo);
+						userInfo.setBearerToken(token);
+					} catch (BadCredentialsException exp) {
+						log.error(exp.getMessage());
+					}
+					otpService.clearOTP(userID);
+					Utils.copyProperties(user, userInfo);
+					log.debug("{}", user);
+				}
+			}
+		}
+		return userInfo;
+	}
+
+	public User validateMobile(Long userDescription) {
+		User user = userRepository.findById(userDescription).orElse(null);
+		if (Boolean.TRUE.equals(Objects.isNull(user))) {
+			return null;
+		} else {
+			user.setMobileVerified(true);
+			User result = userRepository.save(user);
+			log.debug("user creation result {}", result);
+			return result;
+		}
+	}
 }
