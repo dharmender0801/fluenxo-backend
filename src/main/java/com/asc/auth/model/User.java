@@ -101,6 +101,5 @@ public class User extends UserDateAudit {
 	private String otp;
 	@Convert(converter = RoleConverter.class)
 	private UserRoles role;
-	private Long clientId;
 
 }

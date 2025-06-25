@@ -58,5 +58,4 @@ public class UserDto {
 	private Boolean emailVerified;
 	private String bearerToken;
 	private Integer otp;
-	private Long clientId;
 }
