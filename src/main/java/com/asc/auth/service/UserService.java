@@ -115,8 +115,8 @@ public class UserService implements UserDetailsService {
 		user.setPassword(passwordEncoder
 				.encode((Boolean.TRUE.equals(Objects.nonNull(requestUser.getPassword()))) ? requestUser.getPassword()
 						: "123456"));
-		user.setMobileVerified(false);
-		user.setEmailVerified(false);
+		user.setMobileVerified(isNewUser ? false : user.getMobileVerified());
+		user.setEmailVerified(isNewUser ? false : user.getEmailVerified());
 		user.setRole(requestUser.getRole());
 		User result = userRepository.save(user);
 		return result;
@@ -155,7 +155,7 @@ public class UserService implements UserDetailsService {
 			if (serverOtp > 0) {
 				log.debug("Boolean.TRUE.equals({}.compareTo({}): {})", otp, serverOtp, otp.compareTo(serverOtp));
 				if (Boolean.TRUE.equals(otp.compareTo(serverOtp) == 0)) {
-					user = validateMobile(userID);
+					user = validateMobile(userID, channel);
 					Authentication authentication = null;
 					try {
 						authentication = authenticationManager
@@ -181,12 +181,16 @@ public class UserService implements UserDetailsService {
 		return userInfo;
 	}
 
-	public User validateMobile(Long userDescription) {
+	public User validateMobile(Long userDescription, AuthProvider channel) {
 		User user = userRepository.findById(userDescription).orElse(null);
 		if (Boolean.TRUE.equals(Objects.isNull(user))) {
 			return null;
 		} else {
-			user.setMobileVerified(true);
+			if (channel.equals(AuthProvider.mobile)) {
+				user.setMobileVerified(true);
+			} else if (channel.equals(AuthProvider.email)) {
+				user.setEmailVerified(true);
+			}
 			User result = userRepository.save(user);
 			log.debug("user creation result {}", result);
 			return result;
