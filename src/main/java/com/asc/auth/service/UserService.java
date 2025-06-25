@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.asc.auth.dto.SignUpRequest;
 import com.asc.auth.dto.UserDto;
 import com.asc.auth.dto.UserInfoDto;
+import com.asc.auth.exception.BadRequestException;
 import com.asc.auth.exception.ResourceNotFoundException;
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.AuthProvider;
@@ -206,5 +207,17 @@ public class UserService implements UserDetailsService {
 		User result = userRepository.save(user);
 		log.debug("user Update result {}", result);
 		return result;
+	}
+
+	public UserDto updateUser(UserDto userDto) {
+		if (userDto.getId() == null) {
+			throw new BadRequestException("Id Can't be null");
+		}
+		User user = userRepository.findById(userDto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userDto.getId()));
+		Utils.copyProperties(userDto, user);
+		User result = userRepository.save(user);
+		Utils.copyProperties(result, userDto);
+		return userDto;
 	}
 }
