@@ -3,7 +3,7 @@ package com.asc.auth.model.enums;
 import java.util.Objects;
 
 public enum UserRoles {
-	ROLE_SUPERUSER(1), ROLE_ADMIN(2), ROLE_USER(3), ROLE_VENDOR(4), ROLE_EMPLOYEE(5), ROLE_CUSTOMER(6);
+	ROLE_SUPERUSER(1), ROLE_USER(2), ROLE_VENDOR(3), ROLE_LABOUR(4), ROLE_CUSTOMER(5);
 
 	private Integer id;
 
