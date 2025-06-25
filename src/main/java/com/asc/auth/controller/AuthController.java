@@ -27,6 +27,7 @@ import com.asc.auth.dto.UserDto;
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.model.enums.DeviceType;
+import com.asc.auth.model.enums.UserRoles;
 import com.asc.auth.repository.UserRepository;
 import com.asc.auth.security.TokenProvider;
 import com.asc.auth.security.UserPrincipal;
@@ -77,6 +78,17 @@ public class AuthController {
 			userInfo.setOtp(otp);
 			return RestUtils.successResponse(userInfo, "User has been provisioned for channel: ", HttpStatus.CREATED);
 		}
+	}
+
+	@PostMapping("/assignRole")
+	public ResponseEntity<RestResponse<UserDto>> registerUser(
+			@RequestHeader(name = Constants.DEVICE_TYPE, required = false) DeviceType deviceType,
+			@RequestHeader(name = Constants.APP_VERSION, required = false) String appVersion, @RequestParam Long userId,
+			@RequestParam UserRoles userRole) throws ExecutionException, BadRequestException {
+		User result = userService.updateUserRole(userId, userRole);
+		UserDto userInfo = new UserDto();
+		Utils.copyProperties(result, userInfo);
+		return RestUtils.successResponse(userInfo, "User has been provisioned for channel: ", HttpStatus.CREATED);
 	}
 
 	@PostMapping("/login")

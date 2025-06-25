@@ -23,11 +23,13 @@ import com.asc.auth.dto.UserInfoDto;
 import com.asc.auth.exception.ResourceNotFoundException;
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.AuthProvider;
+import com.asc.auth.model.enums.UserRoles;
 import com.asc.auth.repository.UserRepository;
 import com.asc.auth.security.TokenProvider;
 import com.asc.auth.security.UserPrincipal;
 import com.asc.auth.utils.Utils;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -195,5 +197,14 @@ public class UserService implements UserDetailsService {
 			log.debug("user creation result {}", result);
 			return result;
 		}
+	}
+
+	public User updateUserRole(Long userId, UserRoles userRole) {
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userId));
+		user.setRole(userRole);
+		User result = userRepository.save(user);
+		log.debug("user Update result {}", result);
+		return result;
 	}
 }
