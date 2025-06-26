@@ -1,6 +1,6 @@
 package com.asc.auth.dto;
 
-import com.asc.auth.model.enums.UserRoles;
+import com.asc.auth.model.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -21,6 +21,6 @@ public class AuthResponse {
 	private String userEmail;
 	private String firstName;
 	private String lastName;
-	private UserRoles role;
+	private UserType userType;
 	private Integer otp;
 }

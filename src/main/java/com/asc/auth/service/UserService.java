@@ -120,7 +120,7 @@ public class UserService implements UserDetailsService {
 						: "123456"));
 		user.setMobileVerified(isNewUser ? false : user.getMobileVerified());
 		user.setEmailVerified(isNewUser ? false : user.getEmailVerified());
-		user.setRole(requestUser.getRole());
+		user.setUserType(requestUser.getUserType());
 		User result = userRepository.save(user);
 		return result;
 	}
@@ -198,15 +198,6 @@ public class UserService implements UserDetailsService {
 			log.debug("user creation result {}", result);
 			return result;
 		}
-	}
-
-	public User updateUserRole(Long userId, UserRoles userRole) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userId));
-		user.setRole(userRole);
-		User result = userRepository.save(user);
-		log.debug("user Update result {}", result);
-		return result;
 	}
 
 	public UserDto createAndUpdateUser(UserDto userDto) {

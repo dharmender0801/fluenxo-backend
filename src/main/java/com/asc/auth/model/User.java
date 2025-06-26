@@ -1,9 +1,10 @@
 package com.asc.auth.model;
 
-import com.asc.auth.config.RoleConverter;
+import com.asc.auth.config.UserTypeConverter;
 import com.asc.auth.model.audit.UserDateAudit;
 import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.model.enums.UserRoles;
+import com.asc.auth.model.enums.UserType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -99,7 +100,7 @@ public class User extends UserDateAudit {
 	private Boolean isOtp;
 	@Column(name = "otp")
 	private String otp;
-	@Convert(converter = RoleConverter.class)
-	private UserRoles role;
+	@Convert(converter = UserTypeConverter.class)
+	private UserType userType;
 
 }

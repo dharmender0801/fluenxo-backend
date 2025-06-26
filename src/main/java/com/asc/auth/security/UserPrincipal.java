@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.UserRoles;
+import com.asc.auth.model.enums.UserType;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,7 +29,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		return "UserPrincipal [id=" + id + ", mobile=" + mobile + ", email=" + email + ", password=" + password
 				+ ", authorities=" + authorities + ", attributes=" + attributes + ", userRoleId=" + userRoleId
 				+ ", account=" + account + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
-				+ ", isOtp=" + isOtp + ", otp=" + otp + ", user=" + user + ", userRole=" + userRole + "]";
+				+ ", isOtp=" + isOtp + ", otp=" + otp + ", user=" + user + ", userType=" + userType + "]";
 	}
 
 	private String email;
@@ -44,11 +45,11 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 	private String otp;
 	private User user;
 	@Enumerated(EnumType.STRING)
-	private UserRoles userRole;
+	private UserType userType;
 
 	public UserPrincipal(Long id, String mobile, String email, String password,
 			Collection<? extends GrantedAuthority> authorities, String account, String firstName, String lastName,
-			String gender, Boolean isOtp, String otp, User user, UserRoles userRole) {
+			String gender, Boolean isOtp, String otp, User user, UserType userType) {
 		this.id = id;
 		this.mobile = mobile;
 		this.email = email;
@@ -61,7 +62,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		this.isOtp = isOtp;
 		this.otp = otp;
 		this.user = user;
-		this.userRole = userRole;
+		this.userType = userType;
 	}
 
 	public static UserPrincipal create(User user) {
@@ -70,7 +71,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		List<GrantedAuthority> authorities = Collections.singletonList(grantAuthority);
 		return new UserPrincipal(user.getId(), user.getMobile(), user.getEmail(), user.getPassword(), authorities,
 				user.getAccount(), user.getFirstName(), user.getLastName(), user.getGender(), user.getIsOtp(),
-				user.getOtp(), user, user.getRole());
+				user.getOtp(), user, user.getUserType());
 	}
 
 	public String getMobile() {
@@ -199,11 +200,11 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		this.user = user;
 	}
 
-	public UserRoles getUserRole() {
-		return userRole;
+	public UserType getUserType() {
+		return userType;
 	}
 
-	public void setUserRole(UserRoles userRole) {
-		this.userRole = userRole;
+	public void setUserType(UserType userType) {
+		this.userType = userType;
 	}
 }

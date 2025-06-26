@@ -2,6 +2,7 @@ package com.asc.auth.dto;
 
 import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.model.enums.UserRoles;
+import com.asc.auth.model.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -49,5 +50,5 @@ public class SignUpRequest {
 	private String pinCode;
 	private String latitude;
 	private String longitude;
-	private UserRoles role;
+	private UserType userType;
 }

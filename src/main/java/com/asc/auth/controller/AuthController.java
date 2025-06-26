@@ -80,17 +80,6 @@ public class AuthController {
 		}
 	}
 
-	@PostMapping("/assignRole")
-	public ResponseEntity<RestResponse<UserDto>> registerUser(
-			@RequestHeader(name = Constants.DEVICE_TYPE, required = false) DeviceType deviceType,
-			@RequestHeader(name = Constants.APP_VERSION, required = false) String appVersion, @RequestParam Long userId,
-			@RequestParam UserRoles userRole) throws ExecutionException, BadRequestException {
-		User result = userService.updateUserRole(userId, userRole);
-		UserDto userInfo = new UserDto();
-		Utils.copyProperties(result, userInfo);
-		return RestUtils.successResponse(userInfo, "User has been provisioned for channel: ", HttpStatus.CREATED);
-	}
-
 	@PostMapping("/login")
 	public ResponseEntity<RestResponse<AuthResponse>> authenticateUser(
 			@RequestHeader(name = Constants.DEVICE_TYPE, required = false) DeviceType deviceType,
@@ -138,7 +127,7 @@ public class AuthController {
 			auth.setUserEmail(userPrincipal.getEmail());
 			auth.setFirstName(userPrincipal.getFirstName());
 			auth.setLastName(userPrincipal.getLastName());
-			auth.setRole(userPrincipal.getUserRole());
+			auth.setUserType(userPrincipal.getUserType());
 			auth.setTokenType("Bearer");
 			return (Boolean.TRUE.equals(Objects.nonNull(token)))
 					? RestUtils.successResponse(auth, Constants.SUCCESS, HttpStatus.OK)
