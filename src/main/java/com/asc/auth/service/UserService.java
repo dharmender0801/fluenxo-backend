@@ -65,8 +65,6 @@ public class UserService implements UserDetailsService {
 		User user = null;
 		log.info("requestUser: {}", requestUser);
 		if (requestUser.getProvider() != null) {
-			user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
-
 			switch (requestUser.getProvider()) {
 			case mobile:
 				user = userRepository.findByMobile(requestUser.getMobile()).orElse(null);
