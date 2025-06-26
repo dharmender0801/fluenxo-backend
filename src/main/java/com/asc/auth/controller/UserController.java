@@ -32,15 +32,15 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@Operation(summary = " Update User Detail", description = "This api update User Detail", responses = {
+	@Operation(summary = "Add or Update User Detail", description = "This api Add Or Update User Detail", responses = {
 			@ApiResponse(responseCode = "200", description = "OK.", content = {
 					@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = UserDto.class)) }) })
-	@PostMapping(path = "/update", produces = "application/json")
+	@PostMapping(path = "/addOrUpdate", produces = "application/json")
 	public ResponseEntity<RestResponse<UserDto>> addOrUpdate(
 			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
 			@RequestHeader(name = Constants.APP_VERSION) String appVersion, @RequestBody UserDto userDto) {
 		log.info("Add Account Request recived : {} ", userDto);
-		userDto = userService.updateUser(userDto);
+		userDto = userService.createAndUpdateUser(userDto);
 		return Objects.nonNull(userDto) ? RestUtils.successResponse(userDto, Constants.SUCCESS, HttpStatus.OK)
 				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
 	}

@@ -209,12 +209,13 @@ public class UserService implements UserDetailsService {
 		return result;
 	}
 
-	public UserDto updateUser(UserDto userDto) {
-		if (userDto.getId() == null) {
-			throw new BadRequestException("Id Can't be null");
-		}
-		User user = userRepository.findById(userDto.getId())
-				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userDto.getId()));
+	public UserDto createAndUpdateUser(UserDto userDto) {
+		User user = userDto.getId() == null
+				? userRepository
+						.findByEmailOrUserNameOrMobile(userDto.getEmail(), userDto.getUserName(), userDto.getMobile())
+						.orElse(new User())
+				: userRepository.findById(userDto.getId()).orElseThrow(
+						() -> new ResourceNotFoundException("User", "Not found with ID: ", userDto.getId()));
 		Utils.copyProperties(userDto, user);
 		User result = userRepository.save(user);
 		Utils.copyProperties(result, userDto);
