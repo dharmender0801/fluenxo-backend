@@ -145,20 +145,49 @@ public class UserService implements UserDetailsService {
 		return userDto;
 	}
 
-	public UserDto verifyOtp(Integer otp, Long userID, AuthProvider channel) {
+	public UserDto verifyOtp(Integer otp, Long userID, AuthProvider channel, Boolean isLogin) {
 		UserDto userInfo = null;
 		User user = userRepository.findById(userID)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userID));
 		log.debug("Channel: {},user.getMobileVerified(): {}, user.getEmailVerified(): {} ", channel,
 				user.getMobileVerified(), user.getEmailVerified());
-		if (otp >= 0 && ((Boolean.FALSE.equals(user.getMobileVerified())) && channel.equals(AuthProvider.mobile))
-				|| (Boolean.FALSE.equals(user.getEmailVerified())) && channel.equals(AuthProvider.email)) {
+		if (!isLogin) {
+			if (otp >= 0 && ((Boolean.FALSE.equals(user.getMobileVerified())) && channel.equals(AuthProvider.mobile))
+					|| (Boolean.FALSE.equals(user.getEmailVerified())) && channel.equals(AuthProvider.email)) {
+				Integer serverOtp = otpService.getOtp(userID);
+				log.debug("Retrived OTP: {}, Received OTP: {}", serverOtp, otp);
+				if (serverOtp > 0) {
+					log.debug("Boolean.TRUE.equals({}.compareTo({}): {})", otp, serverOtp, otp.compareTo(serverOtp));
+					if (Boolean.TRUE.equals(otp.compareTo(serverOtp) == 0)) {
+						user = validateMobile(userID, channel);
+						Authentication authentication = null;
+						try {
+							authentication = authenticationManager
+									.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), otp));
+							SecurityContextHolder.getContext().setAuthentication(authentication);
+							String token = tokenProvider.createToken(authentication);
+							userInfo = new UserDto();
+							Utils.copyProperties(user, userInfo);
+							log.info("Updating the user in DB also");
+							Utils.copyProperties(userInfo, user);
+							user = userRepository.save(user);
+							Utils.copyProperties(user, userInfo);
+							userInfo.setBearerToken(token);
+						} catch (BadCredentialsException exp) {
+							log.error(exp.getMessage());
+						}
+						otpService.clearOTP(userID);
+						Utils.copyProperties(user, userInfo);
+						log.debug("{}", user);
+					}
+				}
+			}
+		} else {
 			Integer serverOtp = otpService.getOtp(userID);
 			log.debug("Retrived OTP: {}, Received OTP: {}", serverOtp, otp);
 			if (serverOtp > 0) {
 				log.debug("Boolean.TRUE.equals({}.compareTo({}): {})", otp, serverOtp, otp.compareTo(serverOtp));
 				if (Boolean.TRUE.equals(otp.compareTo(serverOtp) == 0)) {
-					user = validateMobile(userID, channel);
 					Authentication authentication = null;
 					try {
 						authentication = authenticationManager
@@ -166,10 +195,6 @@ public class UserService implements UserDetailsService {
 						SecurityContextHolder.getContext().setAuthentication(authentication);
 						String token = tokenProvider.createToken(authentication);
 						userInfo = new UserDto();
-						Utils.copyProperties(user, userInfo);
-						log.info("Updating the user in DB also");
-						Utils.copyProperties(userInfo, user);
-						user = userRepository.save(user);
 						Utils.copyProperties(user, userInfo);
 						userInfo.setBearerToken(token);
 					} catch (BadCredentialsException exp) {

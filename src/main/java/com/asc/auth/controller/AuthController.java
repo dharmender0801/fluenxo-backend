@@ -90,7 +90,7 @@ public class AuthController {
 		log.info("{}", userInfo);
 		if (Boolean.TRUE.equals(Objects.isNull(userInfo))) {
 			return RestUtils.errorResponse(null, Constants.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-		} else if (Boolean.FALSE.equals(userInfo.getMobileVerified())) {
+		} else if (Boolean.FALSE.equals(userInfo.getMobileVerified()) || loginRequest.getIsOtpLogin()) {
 			log.error("mobile number: {}, of user: {}, not verified. ");
 			Integer otp = otpService.generateOTP(userInfo.getId());
 			UserDto userInfoDto = new UserDto();
@@ -141,9 +141,9 @@ public class AuthController {
 			@RequestHeader(name = Constants.APP_VERSION, required = false) String appVersion,
 			@RequestParam(value = "otp", required = true) Integer otp,
 			@RequestParam(value = "userId", required = true) Long userID,
-			@RequestParam(value = "channel", required = true) AuthProvider channel) {
+			@RequestParam(value = "channel", required = true) AuthProvider channel, @RequestParam Boolean isOtpLogin) {
 		log.debug("Received OTP: {}, userID: {}", otp, userID);
-		UserDto userInfo = userService.verifyOtp(otp, userID, channel);
+		UserDto userInfo = userService.verifyOtp(otp, userID, channel, isOtpLogin);
 		return (Boolean.TRUE.equals(Objects.nonNull(userInfo)))
 				? RestUtils.successResponse(userInfo, "OTP verified and User registered successfully.", HttpStatus.OK)
 				: RestUtils.errorResponse(null, "OTP cannot be verified. Please retry.", HttpStatus.BAD_REQUEST);

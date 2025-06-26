@@ -28,4 +28,6 @@ public class LoginRequest {
 
 	@JsonProperty(value = "fcm_id")
 	private String fcmId;
+
+	private Boolean isOtpLogin;
 }
