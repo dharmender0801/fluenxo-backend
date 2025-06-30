@@ -71,6 +71,7 @@ public class AuthController {
 		case mobile:
 			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getMobile(),
 					signUpRequest.getMobile(), signUpRequest.getMobile()).orElse(null);
+			log.info("Requets Checking : {} ", userInfo);
 			break;
 		case email:
 			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getEmail(), signUpRequest.getEmail(),

@@ -81,9 +81,26 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User createorUpdateUser(SignUpRequest requestUser) {
-		User user = userRepository
-				.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getUser(), requestUser.getMobile())
-				.orElse(null);
+		User user = null;
+		switch (requestUser.getProvider()) {
+		case local:
+			user = userRepository
+					.findByEmailOrUserNameOrMobile(requestUser.getUser(), requestUser.getUser(), requestUser.getUser())
+					.orElse(null);
+			break;
+		case mobile:
+			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getMobile(), requestUser.getMobile(),
+					requestUser.getMobile()).orElse(null);
+			break;
+		case email:
+			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getEmail(),
+					requestUser.getEmail()).orElse(null);
+			break;
+		default:
+			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getUser(),
+					requestUser.getMobile()).orElse(null);
+			break;
+		}
 		Boolean isNewUser = Boolean.FALSE;
 		if (Boolean.TRUE.equals(Objects.isNull(user))) {
 			user = new User();
@@ -125,6 +142,7 @@ public class UserService implements UserDetailsService {
 	@Transactional
 	public User createUserWithReplica(SignUpRequest requestUser) {
 		User user = createorUpdateUser(requestUser);
+		log.info("@After User Creation : {} ", user);
 		Authentication authentication = null;
 		try {
 			authentication = authenticationManager
@@ -142,6 +160,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public UserRequestDto create(UserRequestDto signUpRequestDto, String token) {
+		log.info("Signup Request : {} ", signUpRequestDto);
 		try {
 			String signUpUrl = String.format("%s/lms-service/user/add", serviceBaseUrl);
 			log.info("SignUp Url :{} ", signUpUrl);
