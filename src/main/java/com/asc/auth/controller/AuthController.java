@@ -62,8 +62,26 @@ public class AuthController {
 			@RequestHeader(name = Constants.DEVICE_TYPE, required = false) DeviceType deviceType,
 			@RequestHeader(name = Constants.APP_VERSION, required = false) String appVersion,
 			@Valid @RequestBody SignUpRequest signUpRequest) throws ExecutionException, BadRequestException {
-		User userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getEmail(), signUpRequest.getUser(),
-				signUpRequest.getMobile()).orElse(null);
+		User userInfo = null;
+		switch (signUpRequest.getProvider()) {
+		case local:
+			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getUser(), signUpRequest.getUser(),
+					signUpRequest.getUser()).orElse(null);
+			break;
+		case mobile:
+			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getMobile(),
+					signUpRequest.getMobile(), signUpRequest.getMobile()).orElse(null);
+			break;
+		case email:
+			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getEmail(), signUpRequest.getEmail(),
+					signUpRequest.getEmail()).orElse(null);
+			break;
+		default:
+			userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getEmail(), signUpRequest.getUser(),
+					signUpRequest.getMobile()).orElse(null);
+			break;
+		}
+
 		if (userInfo != null) {
 			UserDto userInfoDto = new UserDto();
 			Utils.copyProperties(userInfo, userInfoDto);
