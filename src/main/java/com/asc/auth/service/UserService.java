@@ -1,11 +1,20 @@
 package com.asc.auth.service;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,21 +25,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.asc.auth.dto.ResponseObject;
 import com.asc.auth.dto.SignUpRequest;
 import com.asc.auth.dto.UserDto;
 import com.asc.auth.dto.UserInfoDto;
-import com.asc.auth.exception.BadRequestException;
+import com.asc.auth.dto.UserRequestDto;
 import com.asc.auth.exception.ResourceNotFoundException;
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.AuthProvider;
-import com.asc.auth.model.enums.UserRoles;
 import com.asc.auth.repository.UserRepository;
+import com.asc.auth.security.TokenFilter;
 import com.asc.auth.security.TokenProvider;
 import com.asc.auth.security.UserPrincipal;
 import com.asc.auth.utils.Utils;
 
-import jakarta.validation.Valid;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -49,9 +60,14 @@ public class UserService implements UserDetailsService {
 	@Autowired
 	@Lazy
 	private AuthenticationManager authenticationManager;
-
 	@Autowired
 	TokenProvider tokenProvider;
+	@Value("user.replica.creation.endpoint:/lms-service/labour/addOrUpdate")
+	private String acccountUserCreation;
+	@Value("service.base.url:https://lms-dev.apollosupplychain.com/")
+	private String serviceBaseUrl;
+	@Autowired
+	RestTemplate restTemplate;
 
 	@Override
 	public UserDetails loadUserByUsername(String emailOrUserName) throws UsernameNotFoundException {
@@ -61,27 +77,10 @@ public class UserService implements UserDetailsService {
 		return UserPrincipal.create(user);
 	}
 
-	public User createorUpdateUser(SignUpRequest requestUser, boolean b) {
-		User user = null;
-		log.info("requestUser: {}", requestUser);
-		if (requestUser.getProvider() != null) {
-			switch (requestUser.getProvider()) {
-			case mobile:
-				user = userRepository.findByMobile(requestUser.getMobile()).orElse(null);
-				break;
-			case email:
-				user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
-				break;
-			case local:
-				user = userRepository.findByUserName(requestUser.getUser()).orElse(null);
-				break;
-			default:
-				user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
-			}
-		} else {
-			user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
-		}
-		user = userRepository.findByEmailAndMobile(requestUser.getEmail(), requestUser.getMobile()).orElse(null);
+	public User createorUpdateUser(SignUpRequest requestUser) {
+		User user = userRepository
+				.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getUser(), requestUser.getMobile())
+				.orElse(null);
 		Boolean isNewUser = Boolean.FALSE;
 		if (Boolean.TRUE.equals(Objects.isNull(user))) {
 			user = new User();
@@ -109,18 +108,76 @@ public class UserService implements UserDetailsService {
 		} catch (StringIndexOutOfBoundsException exp) {
 			user.setLastName("");
 		}
-		user.setFullName(user.getFirstName() + " " + user.getLastName());
 		user.setEmail(requestUser.getEmail());
 		user.setMobile(requestUser.getMobile());
-		user.setFcmToken(Objects.nonNull(requestUser.getFcmId()) ? requestUser.getFcmId() : null);
 		user.setPassword(passwordEncoder
 				.encode((Boolean.TRUE.equals(Objects.nonNull(requestUser.getPassword()))) ? requestUser.getPassword()
 						: "123456"));
 		user.setMobileVerified(isNewUser ? false : user.getMobileVerified());
 		user.setEmailVerified(isNewUser ? false : user.getEmailVerified());
-		user.setUserType(requestUser.getUserType());
 		User result = userRepository.save(user);
 		return result;
+	}
+
+	@Transactional
+	public User createUserWithReplica(SignUpRequest requestUser) {
+		User user = createorUpdateUser(requestUser);
+		Authentication authentication = null;
+		try {
+			authentication = authenticationManager
+					.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), "123456"));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String token = tokenProvider.createToken(authentication);
+			UserRequestDto userRequestDto = buildRequest(user);
+			log.info("Create User : {} ", create(userRequestDto, token));
+		} catch (BadCredentialsException exp) {
+			log.error(exp.getMessage());
+		}
+
+		return null;
+	}
+
+	public UserRequestDto create(UserRequestDto signUpRequestDto, String token) {
+		try {
+			String signUpUrl = String.format("%s/lms-service/user/add", serviceBaseUrl);
+			HttpEntity<UserRequestDto> signupRequest = new HttpEntity<>(signUpRequestDto, getServiceHeaders(token));
+			ResponseEntity<ResponseObject<UserRequestDto>> result = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			try {
+				result = restTemplate.exchange(signUpUrl, HttpMethod.POST, signupRequest,
+						new ParameterizedTypeReference<ResponseObject<UserRequestDto>>() {
+						});
+			} catch (Exception exp) {
+				log.error(exp.getMessage());
+			}
+			log.trace("signupResponse: {}", result);
+			if (Boolean.TRUE.equals(result.getStatusCode().is2xxSuccessful())) {
+				return result.getBody().getResponse();
+			} else {
+				throw new ResourceNotFoundException("Account details not found.", "", signUpRequestDto);
+			}
+		} catch (Exception exp) {
+			throw exp;
+		}
+	}
+
+	public HttpHeaders getServiceHeaders(String token) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		log.trace("Jwt ThreadLocal token: {}", TokenFilter.getJwtToken());
+		headers.set("Authorization", String.format("Bearer %s", token));
+		headers.set("DEVICE-TYPE", "Web");
+		headers.set("VER", "1.0");
+		return headers;
+	}
+
+	private UserRequestDto buildRequest(User user) {
+		UserRequestDto userRequestDto = new UserRequestDto();
+		userRequestDto.setId(user.getId());
+		userRequestDto.setUserCode(user.getUserName());
+		userRequestDto.setEmail(user.getEmail());
+		userRequestDto.setMobile(user.getMobile());
+		return userRequestDto;
 	}
 
 	public UserDetails loadUserByUserId(Long valueOf) {

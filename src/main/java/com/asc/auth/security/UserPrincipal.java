@@ -11,11 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.asc.auth.model.User;
-import com.asc.auth.model.enums.UserRoles;
-import com.asc.auth.model.enums.UserType;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -27,42 +23,33 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 	@Override
 	public String toString() {
 		return "UserPrincipal [id=" + id + ", mobile=" + mobile + ", email=" + email + ", password=" + password
-				+ ", authorities=" + authorities + ", attributes=" + attributes + ", userRoleId=" + userRoleId
-				+ ", account=" + account + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
-				+ ", isOtp=" + isOtp + ", otp=" + otp + ", user=" + user + ", userType=" + userType + "]";
+				+ ", authorities=" + authorities + ", attributes=" + attributes + ", firstName=" + firstName
+				+ ", lastName=" + lastName + ", isOtp=" + isOtp + ", otp=" + otp + ", user=" + user + "]";
 	}
 
 	private String email;
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
-	private Long userRoleId;
-	private String account;
 	private String firstName;
 	private String lastName;
-	private String gender;
 	private Boolean isOtp = false;
 	private String otp;
 	private User user;
-	@Enumerated(EnumType.STRING)
-	private UserType userType;
 
 	public UserPrincipal(Long id, String mobile, String email, String password,
-			Collection<? extends GrantedAuthority> authorities, String account, String firstName, String lastName,
-			String gender, Boolean isOtp, String otp, User user, UserType userType) {
+			Collection<? extends GrantedAuthority> authorities, String firstName, String lastName, Boolean isOtp,
+			String otp, User user) {
 		this.id = id;
 		this.mobile = mobile;
 		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
-		this.account = account;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.gender = gender;
 		this.isOtp = isOtp;
 		this.otp = otp;
 		this.user = user;
-		this.userType = userType;
 	}
 
 	public static UserPrincipal create(User user) {
@@ -70,8 +57,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		SimpleGrantedAuthority grantAuthority = new SimpleGrantedAuthority("ROLE_USER");
 		List<GrantedAuthority> authorities = Collections.singletonList(grantAuthority);
 		return new UserPrincipal(user.getId(), user.getMobile(), user.getEmail(), user.getPassword(), authorities,
-				user.getAccount(), user.getFirstName(), user.getLastName(), user.getGender(), user.getIsOtp(),
-				user.getOtp(), user, user.getUserType());
+				user.getFirstName(), user.getLastName(), user.getIsOtp(), user.getOtp(), user);
 	}
 
 	public String getMobile() {
@@ -94,14 +80,6 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		return lastName;
 	}
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
@@ -114,14 +92,6 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		UserPrincipal userPrincipal = UserPrincipal.create(user);
 		userPrincipal.setAttributes(attributes);
 		return userPrincipal;
-	}
-
-	public Long getUserRoleId() {
-		return userRoleId;
-	}
-
-	public void setUserRoleId(Long role) {
-		this.userRoleId = role;
 	}
 
 	public Long getId() {
@@ -184,14 +154,6 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		return String.valueOf(id);
 	}
 
-	public String getAccount() {
-		return account;
-	}
-
-	public void setAccount(String account) {
-		this.account = account;
-	}
-
 	public User getUser() {
 		return user;
 	}
@@ -200,11 +162,4 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		this.user = user;
 	}
 
-	public UserType getUserType() {
-		return userType;
-	}
-
-	public void setUserType(UserType userType) {
-		this.userType = userType;
-	}
 }

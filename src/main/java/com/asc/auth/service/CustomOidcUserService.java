@@ -80,16 +80,16 @@ public class CustomOidcUserService extends OidcUserService {
 		signUpRequest.setFirstName(userInfo.getName());
 		signUpRequest.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
 //		signUpRequest.setProviderId(userRequest.getIdToken().getSubject());
-		signUpRequest.setImageUrl(userInfo.getImageUrl());
-		return userService.createorUpdateUser(signUpRequest, true);
+//		signUpRequest.setImageUrl(userInfo.getImageUrl());
+		return userService.createorUpdateUser(signUpRequest);
 	}
 
 	private User updateExistingUser(OAuth2UserInfo userInfo, OidcUserRequest userRequest) {
 		SignUpRequest signUpRequest = new SignUpRequest();
 		signUpRequest.setEmail(userInfo.getEmail());
 		signUpRequest.setFirstName(userInfo.getName());
-		signUpRequest.setImageUrl(userInfo.getImageUrl());
+//		signUpRequest.setImageUrl(userInfo.getImageUrl());
 		signUpRequest.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
-		return userService.createorUpdateUser(signUpRequest, false);
+		return userService.createorUpdateUser(signUpRequest);
 	}
 }

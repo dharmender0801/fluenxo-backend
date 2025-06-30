@@ -62,21 +62,22 @@ public class AuthController {
 			@RequestHeader(name = Constants.DEVICE_TYPE, required = false) DeviceType deviceType,
 			@RequestHeader(name = Constants.APP_VERSION, required = false) String appVersion,
 			@Valid @RequestBody SignUpRequest signUpRequest) throws ExecutionException, BadRequestException {
-		if (Boolean.TRUE.equals(signUpRequest.getProvider().equals(AuthProvider.email))
-				&& Boolean.TRUE.equals(userRepository.existsByEmailAndEmailVerified(signUpRequest.getEmail(), true))) {
-			throw new BadRequestException("Email address already in use.");
-		} else if (Boolean.TRUE.equals(signUpRequest.getProvider().equals(AuthProvider.mobile)) && Boolean.TRUE
-				.equals(userRepository.existsByMobileAndMobileVerified(signUpRequest.getMobile(), true))) {
-			throw new BadRequestException("Mobile Number already in use.");
+		User userInfo = userRepository.findByEmailOrUserNameOrMobile(signUpRequest.getEmail(), signUpRequest.getUser(),
+				signUpRequest.getMobile()).orElse(null);
+		if (userInfo != null) {
+			UserDto userInfoDto = new UserDto();
+			Utils.copyProperties(userInfo, userInfoDto);
+			return RestUtils.errorResponse(userInfoDto,
+					"This account already exists. Please log in or use a different email/mobile.", HttpStatus.CONFLICT);
 		} else {
-			signUpRequest.setProvider(signUpRequest.getProvider());
-			User result = userService.createorUpdateUser(signUpRequest, false);
+			User result = userService.createUserWithReplica(signUpRequest);
 			log.info("User Creation : {} ", result);
 			int otp = otpService.generateOTP(result.getId());
-			UserDto userInfo = new UserDto();
-			Utils.copyProperties(result, userInfo);
-			userInfo.setOtp(otp);
-			return RestUtils.successResponse(userInfo, "User has been provisioned for channel: ", HttpStatus.CREATED);
+			UserDto userInfoDto = new UserDto();
+			Utils.copyProperties(result, userInfoDto);
+			userInfoDto.setOtp(otp);
+			return RestUtils.successResponse(userInfoDto, "User has been provisioned for channel: ",
+					HttpStatus.CREATED);
 		}
 	}
 
@@ -116,10 +117,6 @@ public class AuthController {
 			String token = tokenProvider.createToken(authentication);
 			authentication = SecurityContextHolder.getContext().getAuthentication();
 			UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-			if (Objects.nonNull(loginRequest.getFcmId())) {
-				userInfo.setFcmToken(loginRequest.getFcmId());
-				userRepository.save(userInfo);
-			}
 			AuthResponse auth = new AuthResponse();
 			auth.setId(userPrincipal.getId());
 			auth.setAccessToken(token);
@@ -127,7 +124,6 @@ public class AuthController {
 			auth.setUserEmail(userPrincipal.getEmail());
 			auth.setFirstName(userPrincipal.getFirstName());
 			auth.setLastName(userPrincipal.getLastName());
-			auth.setUserType(userPrincipal.getUserType());
 			auth.setTokenType("Bearer");
 			return (Boolean.TRUE.equals(Objects.nonNull(token)))
 					? RestUtils.successResponse(auth, Constants.SUCCESS, HttpStatus.OK)

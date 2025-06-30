@@ -77,8 +77,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		signUpRequest.setFirstName(oAuth2UserInfo.getName());
 		signUpRequest.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
 //		signUpRequest.setProviderId(oAuth2UserInfo.getId());
-		signUpRequest.setImageUrl(oAuth2UserInfo.getImageUrl());
-		return userService.createorUpdateUser(signUpRequest, true);
+//		signUpRequest.setImageUrl(oAuth2UserInfo.getImageUrl());
+		return userService.createorUpdateUser(signUpRequest);
 	}
 
 	private User updateExistingUser(OAuth2UserInfo oAuth2UserInfo) {
@@ -86,7 +86,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		signUpRequest.setEmail(oAuth2UserInfo.getEmail());
 		signUpRequest.setFirstName(oAuth2UserInfo.getName());
 //		signUpRequest.setProviderId(oAuth2UserInfo.getId());
-		signUpRequest.setImageUrl(oAuth2UserInfo.getImageUrl());
-		return userService.createorUpdateUser(signUpRequest, false);
+//		signUpRequest.setImageUrl(oAuth2UserInfo.getImageUrl());
+		return userService.createorUpdateUser(signUpRequest);
 	}
 }
