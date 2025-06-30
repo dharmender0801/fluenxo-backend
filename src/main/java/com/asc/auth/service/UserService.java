@@ -62,12 +62,15 @@ public class UserService implements UserDetailsService {
 	private AuthenticationManager authenticationManager;
 	@Autowired
 	TokenProvider tokenProvider;
-	@Value("user.replica.creation.endpoint:/lms-service/labour/addOrUpdate")
-	private String acccountUserCreation;
-	@Value("service.base.url:https://lms-dev.apollosupplychain.com/")
+	@Value("${service.base.url:https://lms-dev.apollosupplychain.com/}")
 	private String serviceBaseUrl;
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Value("${superuser.email:dharmender.kumar@apollosupplychain.com}")
+	private String superUserEmail;
+	@Value("${superuser.password:abc@123}")
+	private String password;
 
 	@Override
 	public UserDetails loadUserByUsername(String emailOrUserName) throws UsernameNotFoundException {
@@ -125,21 +128,23 @@ public class UserService implements UserDetailsService {
 		Authentication authentication = null;
 		try {
 			authentication = authenticationManager
-					.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), "123456"));
+					.authenticate(new UsernamePasswordAuthenticationToken(superUserEmail, password));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String token = tokenProvider.createToken(authentication);
+			log.info(token);
 			UserRequestDto userRequestDto = buildRequest(user);
 			log.info("Create User : {} ", create(userRequestDto, token));
 		} catch (BadCredentialsException exp) {
 			log.error(exp.getMessage());
 		}
 
-		return null;
+		return user;
 	}
 
 	public UserRequestDto create(UserRequestDto signUpRequestDto, String token) {
 		try {
 			String signUpUrl = String.format("%s/lms-service/user/add", serviceBaseUrl);
+			log.info("SignUp Url :{} ", signUpUrl);
 			HttpEntity<UserRequestDto> signupRequest = new HttpEntity<>(signUpRequestDto, getServiceHeaders(token));
 			ResponseEntity<ResponseObject<UserRequestDto>> result = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			try {
@@ -149,7 +154,7 @@ public class UserService implements UserDetailsService {
 			} catch (Exception exp) {
 				log.error(exp.getMessage());
 			}
-			log.trace("signupResponse: {}", result);
+			log.info("signupResponse: {}", result);
 			if (Boolean.TRUE.equals(result.getStatusCode().is2xxSuccessful())) {
 				return result.getBody().getResponse();
 			} else {
