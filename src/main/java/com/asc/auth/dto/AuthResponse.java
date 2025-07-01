@@ -1,5 +1,6 @@
 package com.asc.auth.dto;
 
+import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.model.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -23,4 +24,5 @@ public class AuthResponse {
 	private String lastName;
 	private UserType userType;
 	private Integer otp;
+	private AuthProvider provider;
 }
