@@ -112,7 +112,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
 	@Override
 	public String getUsername() {
-		return email;
+		return user != null ? user.getUserName() : email;
 	}
 
 	@Override
