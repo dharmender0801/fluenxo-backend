@@ -108,6 +108,10 @@ public class UserService implements UserDetailsService {
 			user.setProvider(requestUser.getProvider());
 			if (Boolean.TRUE.equals(Objects.nonNull(requestUser.getUser()))) {
 				user.setUserName(requestUser.getUser());
+			} else {
+				user.setUserName(AuthProvider.mobile.equals(requestUser.getProvider()) ? requestUser.getMobile()
+						: AuthProvider.email.equals(requestUser.getProvider()) ? requestUser.getEmail()
+								: requestUser.getUser());
 			}
 		}
 		try {

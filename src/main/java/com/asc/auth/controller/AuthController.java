@@ -95,6 +95,7 @@ public class AuthController {
 			UserDto userInfoDto = new UserDto();
 			Utils.copyProperties(result, userInfoDto);
 			userInfoDto.setOtp(otp);
+			userInfoDto.setProvider(result.getProvider());
 			return RestUtils.successResponse(userInfoDto, "User has been provisioned for channel: ",
 					HttpStatus.CREATED);
 		}
