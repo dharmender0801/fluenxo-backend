@@ -245,8 +245,8 @@ public class UserService implements UserDetailsService {
 						user = validateMobile(userID, channel);
 						Authentication authentication = null;
 						try {
-							authentication = authenticationManager
-									.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), otp));
+							authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+									AuthProvider.mobile.equals(channel) ? user.getMobile() : user.getEmail(), otp));
 							SecurityContextHolder.getContext().setAuthentication(authentication);
 							String token = tokenProvider.createToken(authentication);
 							userInfo = new UserDto();
@@ -273,8 +273,8 @@ public class UserService implements UserDetailsService {
 				if (Boolean.TRUE.equals(otp.compareTo(serverOtp) == 0)) {
 					Authentication authentication = null;
 					try {
-						authentication = authenticationManager
-								.authenticate(new UsernamePasswordAuthenticationToken(user.getMobile(), otp));
+						authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+								AuthProvider.mobile.equals(channel) ? user.getMobile() : user.getEmail(), otp));
 						SecurityContextHolder.getContext().setAuthentication(authentication);
 						String token = tokenProvider.createToken(authentication);
 						userInfo = new UserDto();
