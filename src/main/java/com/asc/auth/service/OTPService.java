@@ -122,8 +122,8 @@ public class OTPService {
 						+ "This OTP is valid for 5 minutes. Please do not share it with anyone.\n\n" + "Thank you,\n"
 						+ "Apollo Supply Chain";
 				Map<String, Object> emailData = new HashMap<>();
-				emailData.put("toEmails", "dharmender.kumar@apollosupplychain.com");
-				emailData.put("subject", "this Is testing for mail ");
+				emailData.put("toEmails", userInfo.getEmail());
+				emailData.put("subject", "Apollo Supply Chain – Secure OTP for Verification");
 				emailData.put("bodyText", bodyText);
 				emailData.put("isBodyHtml", false);
 				log.info("sending Request : {} ", communicationService.sendMail(emailData, token));
