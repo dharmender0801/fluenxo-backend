@@ -1,5 +1,7 @@
 package com.asc.auth.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -7,12 +9,20 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.asc.auth.dto.UserDto;
 import com.asc.auth.model.User;
+import com.asc.auth.model.enums.AuthProvider;
 import com.asc.auth.repository.UserRepository;
+import com.asc.auth.security.TokenProvider;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -32,6 +42,21 @@ public class OTPService {
 	UserRepository userRepo;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private CommunicationService communicationService;
+
+	@Autowired
+	private TokenProvider tokenProvider;
+
+	@Autowired
+	@Lazy
+	private AuthenticationManager authenticationManager;
+
+	@Value("${superuser.email:af-1870}")
+	private String superUserEmail;
+	@Value("${superuser.password:abc@123}")
+	private String password;
 
 	private LoadingCache<Long, Integer> otpCache;
 
@@ -86,7 +111,28 @@ public class OTPService {
 	}
 
 	public Boolean sendOtp(UserDto userInfo, Integer otp) {
-		// TODO Auto-generated method stub
+		Authentication authentication = null;
+		try {
+			authentication = authenticationManager
+					.authenticate(new UsernamePasswordAuthenticationToken(superUserEmail, password));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String token = tokenProvider.createToken(authentication);
+			if (AuthProvider.email.equals(userInfo.getProvider())) {
+				String bodyText = "Dear User,\n\n" + "Your One Time Password (OTP) is: " + otp + " \n"
+						+ "This OTP is valid for 5 minutes. Please do not share it with anyone.\n\n" + "Thank you,\n"
+						+ "Apollo Supply Chain";
+				Map<String, Object> emailData = new HashMap<>();
+				emailData.put("toEmails", "dharmender.kumar@apollosupplychain.com");
+				emailData.put("subject", "this Is testing for mail ");
+				emailData.put("bodyText", bodyText);
+				emailData.put("isBodyHtml", false);
+				log.info("sending Request : {} ", communicationService.sendMail(emailData, token));
+
+			}
+		} catch (BadCredentialsException exp) {
+			log.error("Not Genrating : {} ", exp.getMessage());
+		}
+
 		return null;
 	}
 }
