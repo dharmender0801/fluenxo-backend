@@ -13,8 +13,8 @@
 	<groupId>user-service</groupId>
 	<artifactId>lms-auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>lms-auth-service</name>
-	<description>Lms Auth Service</description>
+	<name>face-service</name>
+	<description>Ai face  Service</description>
 	<url />
 	<licenses>
 		<license />
@@ -124,7 +124,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>lms-auth-service</finalName>
+		<finalName>backend-service</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
