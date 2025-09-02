@@ -12,7 +12,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script{
-                     sh 'sshpass -e -v scp -o StrictHostKeyChecking=no  target/lms-auth-service.war jenkins@pms-dev.apollosupplychain.com:/opt/docker/pms-dev/tomcat/webapps/'
+                     sh 'mv target/lms-auth-service.war /opt/docker/pms-dev/tomcat/webapps/'
                 }
             }
         }
