@@ -12,7 +12,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script{
-                     sh 'mv target/lms-auth-service.war /opt/docker/pms-dev/tomcat/webapps/'
+                     sh 'mv target/lms-auth-service.war /opt/tomcat/webapps/'
                 }
             }
         }
