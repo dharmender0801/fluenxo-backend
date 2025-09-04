@@ -14,7 +14,7 @@
 	<artifactId>lms-auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>face-service</name>
-	<description>Ai face  Service</description>
+	<description>Ai face Service</description>
 	<url />
 	<licenses>
 		<license />
@@ -121,6 +121,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
