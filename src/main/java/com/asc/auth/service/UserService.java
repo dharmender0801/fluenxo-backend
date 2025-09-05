@@ -92,6 +92,9 @@ public class UserService implements UserDetailsService {
 		case email:
 			user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
 			break;
+		case google:
+			user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
+			break;
 		default:
 			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getUser(),
 					requestUser.getMobile()).orElse(null);
