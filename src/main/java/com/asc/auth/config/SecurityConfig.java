@@ -57,7 +57,8 @@ public class SecurityConfig {
 			"https://ptl.apollosupplychain.com", "https://dev.apollosupplychain.com",
 			"https://uat.apollosupplychain.com", "https://ems.apollosupplychain.com",
 			"https://ems-dev.apollosupplychain.com", "https://pms.apollosupplychain.com",
-			"https://lms-dev.apollosupplychain.com", "https://dev.drinkxtcy.com", "https://mission.drinkxtcy.com");
+			"https://lms-dev.apollosupplychain.com", "https://dev.drinkxtcy.com", "https://mission.drinkxtcy.com",
+			"http://localhost:5173", "https://fluenxo.dharmenderkumar.com");
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
