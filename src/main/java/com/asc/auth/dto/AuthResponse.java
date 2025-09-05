@@ -25,4 +25,5 @@ public class AuthResponse {
 	private UserType userType;
 	private Integer otp;
 	private AuthProvider provider;
+
 }

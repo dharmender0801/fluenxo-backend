@@ -84,17 +84,13 @@ public class UserService implements UserDetailsService {
 		User user = null;
 		switch (requestUser.getProvider()) {
 		case local:
-			user = userRepository
-					.findByEmailOrUserNameOrMobile(requestUser.getUser(), requestUser.getUser(), requestUser.getUser())
-					.orElse(null);
+			user = userRepository.findByUserName(requestUser.getUser()).orElse(null);
 			break;
 		case mobile:
-			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getMobile(), requestUser.getMobile(),
-					requestUser.getMobile()).orElse(null);
+			user = userRepository.findByMobile(requestUser.getMobile()).orElse(null);
 			break;
 		case email:
-			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getEmail(),
-					requestUser.getEmail()).orElse(null);
+			user = userRepository.findByEmail(requestUser.getEmail()).orElse(null);
 			break;
 		default:
 			user = userRepository.findByEmailOrUserNameOrMobile(requestUser.getEmail(), requestUser.getUser(),
@@ -318,6 +314,14 @@ public class UserService implements UserDetailsService {
 		Utils.copyProperties(userDto, user);
 		User result = userRepository.save(user);
 		Utils.copyProperties(result, userDto);
+		return userDto;
+	}
+
+	public UserDto getUserById(Long userId) {
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Not found with ID: ", userId));
+		UserDto userDto = new UserDto();
+		Utils.copyProperties(user, userDto);
 		return userDto;
 	}
 }

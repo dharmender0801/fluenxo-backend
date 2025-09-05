@@ -5,10 +5,12 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.asc.auth.dto.UserDto;
@@ -41,6 +43,19 @@ public class UserController {
 			@RequestHeader(name = Constants.APP_VERSION) String appVersion, @RequestBody UserDto userDto) {
 		log.info("Add Account Request recived : {} ", userDto);
 		userDto = userService.createAndUpdateUser(userDto);
+		return Objects.nonNull(userDto) ? RestUtils.successResponse(userDto, Constants.SUCCESS, HttpStatus.OK)
+				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
+	}
+
+	@Operation(summary = "Get User Detail", description = "This api provide User Detail", responses = {
+			@ApiResponse(responseCode = "200", description = "OK.", content = {
+					@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = UserDto.class)) }) })
+	@GetMapping(path = "/getByUserId", produces = "application/json")
+	public ResponseEntity<RestResponse<UserDto>> getByUserId(
+			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
+			@RequestHeader(name = Constants.APP_VERSION) String appVersion, @RequestParam Long userId) {
+		log.info("Add Account Request recived : {} ", userId);
+		UserDto userDto = userService.getUserById(userId);
 		return Objects.nonNull(userDto) ? RestUtils.successResponse(userDto, Constants.SUCCESS, HttpStatus.OK)
 				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
 	}
