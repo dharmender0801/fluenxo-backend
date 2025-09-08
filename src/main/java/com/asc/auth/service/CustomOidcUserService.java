@@ -59,7 +59,7 @@ public class CustomOidcUserService extends OidcUserService {
 	private User findOrCreateUser(OidcUserRequest userRequest, OAuth2UserInfo userInfo) {
 		Optional<User> userOptional = userService.findByEmail(userInfo.getEmail());
 		User user;
-
+		log.info("User Image Url : {} ", userInfo.getImageUrl());
 		if (userOptional.isPresent()) {
 			user = userOptional.get();
 			if (!user.getProvider()

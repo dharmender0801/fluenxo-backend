@@ -1,13 +1,9 @@
 package com.asc.auth.model;
 
-import com.asc.auth.config.UserTypeConverter;
 import com.asc.auth.model.audit.UserDateAudit;
 import com.asc.auth.model.enums.AuthProvider;
-import com.asc.auth.model.enums.UserRoles;
-import com.asc.auth.model.enums.UserType;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
