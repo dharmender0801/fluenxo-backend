@@ -138,6 +138,7 @@ public class UserService implements UserDetailsService {
 						: "123456"));
 		user.setMobileVerified(isNewUser ? false : user.getMobileVerified());
 		user.setEmailVerified(isNewUser ? false : user.getEmailVerified());
+		user.setProfileImage(requestUser.getProfileImage());
 		User result = userRepository.save(user);
 		return result;
 	}
