@@ -24,7 +24,7 @@ public class FileService {
 	@Value("${file.access.base.domain.url:https://fluenxo.dharmenderkumar.com/file-uploads/}")
 	String fileAccessBaseUrl;
 
-	@Value("${replace.path:/var/www/html/files/}")
+	@Value("${replace.path:/var/www/html/files/assets/}")
 	private String replacePath;
 
 	public String uploadFile(MultipartFile file) throws Exception {
