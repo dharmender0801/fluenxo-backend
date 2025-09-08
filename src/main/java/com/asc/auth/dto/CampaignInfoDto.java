@@ -2,6 +2,7 @@ package com.asc.auth.dto;
 
 import java.math.BigDecimal;
 
+import com.asc.auth.model.audit.UserDateAudit;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CampaignInfoDto {
+public class CampaignInfoDto extends UserDateAudit {
 
 	private Long id;
 	private String title;
