@@ -20,11 +20,13 @@ import com.asc.auth.utils.Constants;
 import com.asc.auth.utils.response.RestResponse;
 import com.asc.auth.utils.response.RestUtils;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
 @RequestMapping("/validate")
+@Tag(name = "Validation Controller", description = "User Validation API's")
 public class ValidationController {
 
 	@Autowired

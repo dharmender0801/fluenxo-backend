@@ -38,12 +38,14 @@ import com.asc.auth.utils.Utils;
 import com.asc.auth.utils.response.RestResponse;
 import com.asc.auth.utils.response.RestUtils;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
 @RequestMapping("/auth")
+@Tag(name = "Auth Controller", description = "Auth Management Api's")
 public class AuthController {
 
 	@Autowired
