@@ -48,7 +48,7 @@ public class CustomOidcUserService extends OidcUserService {
 	private OidcUser processOidcUser(OidcUserRequest userRequest, OidcUser oidcUser) {
 		OAuth2UserInfo userInfo = OAuth2UserInfoFactory
 				.getOAuth2UserInfo(userRequest.getClientRegistration().getRegistrationId(), oidcUser.getAttributes());
-		log.info("User Detail : {} ", userInfo);
+		log.info("Img Url : {} ", userInfo.getImageUrl());
 		if (ObjectUtils.isEmpty(userInfo.getEmail())) {
 			throw new OAuth2AuthenticationProcessingException("Email not found from OIDC provider");
 		}
