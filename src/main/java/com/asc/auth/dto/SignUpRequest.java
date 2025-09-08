@@ -32,4 +32,5 @@ public class SignUpRequest {
 	private String password;
 	@Enumerated(EnumType.STRING)
 	private AuthProvider provider;
+	private String profileImage;
 }

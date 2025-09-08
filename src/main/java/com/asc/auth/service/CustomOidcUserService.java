@@ -48,7 +48,6 @@ public class CustomOidcUserService extends OidcUserService {
 	private OidcUser processOidcUser(OidcUserRequest userRequest, OidcUser oidcUser) {
 		OAuth2UserInfo userInfo = OAuth2UserInfoFactory
 				.getOAuth2UserInfo(userRequest.getClientRegistration().getRegistrationId(), oidcUser.getAttributes());
-		log.info("Img Url : {} ", userInfo.getImageUrl());
 		if (ObjectUtils.isEmpty(userInfo.getEmail())) {
 			throw new OAuth2AuthenticationProcessingException("Email not found from OIDC provider");
 		}
@@ -81,7 +80,7 @@ public class CustomOidcUserService extends OidcUserService {
 		signUpRequest.setFirstName(userInfo.getName());
 		signUpRequest.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
 //		signUpRequest.setProviderId(userRequest.getIdToken().getSubject());
-//		signUpRequest.setImageUrl(userInfo.getImageUrl());
+		signUpRequest.setProfileImage(userInfo.getImageUrl());
 		return userService.createorUpdateUser(signUpRequest);
 	}
 
@@ -89,7 +88,7 @@ public class CustomOidcUserService extends OidcUserService {
 		SignUpRequest signUpRequest = new SignUpRequest();
 		signUpRequest.setEmail(userInfo.getEmail());
 		signUpRequest.setFirstName(userInfo.getName());
-//		signUpRequest.setImageUrl(userInfo.getImageUrl());
+		signUpRequest.setProfileImage(userInfo.getImageUrl());
 		signUpRequest.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
 		return userService.createorUpdateUser(signUpRequest);
 	}

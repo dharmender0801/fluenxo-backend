@@ -65,4 +65,5 @@ public class User extends UserDateAudit {
 	private Boolean isOtp;
 	@Column(name = "otp")
 	private String otp;
+	private String profileImage;
 }

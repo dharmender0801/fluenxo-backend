@@ -47,6 +47,7 @@ public class UserInfoDto {
 	private Boolean credentialsNonExpired;
 	@JsonProperty("name")
 	private String name;
+	private String profileImage;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@ToString
