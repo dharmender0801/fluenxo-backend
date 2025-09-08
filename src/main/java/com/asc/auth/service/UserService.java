@@ -1,14 +1,22 @@
 package com.asc.auth.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.dto.ResponseObject;
 import com.asc.auth.dto.SignUpRequest;
 import com.asc.auth.dto.UserDto;
@@ -39,6 +48,7 @@ import com.asc.auth.repository.UserRepository;
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.security.TokenProvider;
 import com.asc.auth.security.UserPrincipal;
+import com.asc.auth.transformer.UserInfoFiltersTransformer;
 import com.asc.auth.utils.Utils;
 
 import jakarta.transaction.Transactional;
@@ -327,5 +337,28 @@ public class UserService implements UserDetailsService {
 		UserDto userDto = new UserDto();
 		Utils.copyProperties(user, userDto);
 		return userDto;
+	}
+
+	public Page<UserDto> getUsers(List<FiltersDto> filters, Integer pageNumber, Integer pageSize, String sortingColumn,
+			Direction direction) {
+		Sort sorting = (Boolean.TRUE.equals(Objects.nonNull(sortingColumn))
+				&& Boolean.TRUE.equals(Objects.nonNull(direction))) ? Sort.by(direction, sortingColumn)
+						: Sort.by(Direction.ASC, "id");
+		filters = (Boolean.FALSE.equals(filters.isEmpty())) ? filters : new ArrayList<>();
+		pageSize = (Boolean.FALSE.equals(pageSize < 1)) ? pageSize : 5;
+		Page<User> pageList = userRepository.findAll(UserInfoFiltersTransformer.buildCriteria(filters),
+				PageRequest.of(pageNumber, pageSize, sorting));
+		if (!pageList.isEmpty()) {
+			List<UserDto> userDetail = pageList.stream().map(user -> {
+				UserDto userDto = new UserDto();
+				Utils.copyProperties(user, userDto);
+				return userDto;
+			}).collect(Collectors.toList());
+			Page<UserDto> pageData = new PageImpl<>(userDetail, PageRequest.of(pageNumber, pageSize, sorting),
+					pageList.getTotalElements());
+			return pageData;
+
+		}
+		return null;
 	}
 }
