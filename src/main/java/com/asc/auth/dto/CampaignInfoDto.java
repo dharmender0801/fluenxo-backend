@@ -16,11 +16,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampaignInfoDto extends UserDateAudit {
-
 	private Long id;
 	private String title;
 	private String image;
-	private String budget;
+	private BigDecimal budget;
 	private Integer status;
 	private Integer reach;
 	private Integer clicks;
