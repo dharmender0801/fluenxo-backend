@@ -10,6 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
@@ -62,4 +64,16 @@ public class User extends UserDateAudit {
 	@Column(name = "otp")
 	private String otp;
 	private String profileImage;
+	@ManyToOne
+	@JoinColumn(name = "role_id")
+	private RoleMaster role;
+
+	public Long getRoleId() {
+		return role != null ? role.getId() : null;
+	}
+
+	public String getRoleName() {
+		return role != null ? role.getName() : null;
+	}
+
 }

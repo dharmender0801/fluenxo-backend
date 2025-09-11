@@ -41,9 +41,12 @@ import com.asc.auth.dto.SignUpRequest;
 import com.asc.auth.dto.UserDto;
 import com.asc.auth.dto.UserInfoDto;
 import com.asc.auth.dto.UserRequestDto;
+import com.asc.auth.exception.RecordNotFoundException;
 import com.asc.auth.exception.ResourceNotFoundException;
+import com.asc.auth.model.RoleMaster;
 import com.asc.auth.model.User;
 import com.asc.auth.model.enums.AuthProvider;
+import com.asc.auth.repository.RoleMasterRepository;
 import com.asc.auth.repository.UserRepository;
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.security.TokenProvider;
@@ -81,6 +84,9 @@ public class UserService implements UserDetailsService {
 	private String superUserEmail;
 	@Value("${superuser.password:abc@123}")
 	private String password;
+
+	@Autowired
+	RoleMasterRepository roleMasterRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String emailOrUserName) throws UsernameNotFoundException {
@@ -325,6 +331,11 @@ public class UserService implements UserDetailsService {
 						.orElse(new User())
 				: userRepository.findById(userDto.getId()).orElseThrow(
 						() -> new ResourceNotFoundException("User", "Not found with ID: ", userDto.getId()));
+		if (Objects.nonNull(userDto.getRoleId())) {
+			RoleMaster roleMaster = roleMasterRepository.findById(userDto.getRoleId())
+					.orElseThrow(() -> new RecordNotFoundException("Role Not found "));
+			user.setRole(roleMaster);
+		}
 		Utils.copyProperties(userDto, user);
 		User result = userRepository.save(user);
 		Utils.copyProperties(result, userDto);

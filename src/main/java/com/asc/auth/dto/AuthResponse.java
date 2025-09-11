@@ -26,5 +26,7 @@ public class AuthResponse {
 	private Integer otp;
 	private AuthProvider provider;
 	private String profileImage;
+	private Long roleId;
+	private String roleName;
 
 }
