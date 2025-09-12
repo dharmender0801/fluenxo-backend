@@ -39,5 +39,6 @@ public class RoleMaster extends UserDateAudit {
 	@JsonManagedReference
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "role", cascade = { CascadeType.ALL }, orphanRemoval = true)
 	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	List<ModulePermissions> modulePermissions;
 }

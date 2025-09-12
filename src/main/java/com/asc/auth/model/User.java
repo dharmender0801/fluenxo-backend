@@ -2,6 +2,7 @@ package com.asc.auth.model;
 
 import com.asc.auth.model.audit.UserDateAudit;
 import com.asc.auth.model.enums.AuthProvider;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,8 +66,10 @@ public class User extends UserDateAudit {
 	@Column(name = "otp")
 	private String otp;
 	private String profileImage;
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "role_id")
+	@ToString.Exclude
+	@JsonIgnore
 	private RoleMaster role;
 
 	public Long getRoleId() {
