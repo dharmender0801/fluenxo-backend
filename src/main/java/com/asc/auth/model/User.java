@@ -65,7 +65,7 @@ public class User extends UserDateAudit {
 	@Column(name = "otp")
 	private String otp;
 	private String profileImage;
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "role_id")
 	private RoleMaster role;
 
