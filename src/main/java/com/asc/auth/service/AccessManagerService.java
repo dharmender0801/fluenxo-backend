@@ -73,7 +73,11 @@ public class AccessManagerService {
 		RolesDto roleDto = new RolesDto();
 		Utils.copyProperties(role, roleDto);
 		if (flag) {
-			List<RolePermissionsDto> rolePermissionsDtoList = new ArrayList<>();
+			List<RolePermissionsDto> rolePermissionsDtoList = role.getModulePermissions().stream().map(obj -> {
+				RolePermissionsDto permissionsDto = new RolePermissionsDto();
+				Utils.copyProperties(obj, permissionsDto);
+				return permissionsDto;
+			}).collect(Collectors.toList());
 			roleDto.setRolePermissions(rolePermissionsDtoList);
 		}
 		return roleDto;
