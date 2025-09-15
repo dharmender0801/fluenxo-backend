@@ -30,6 +30,7 @@ public class CampaignInfo extends UserDateAudit {
 	private Long id;
 	private String title;
 	private String image;
+	private String campaignLink;
 	private BigDecimal budget;
 	private Integer status;
 	private Integer reach;
