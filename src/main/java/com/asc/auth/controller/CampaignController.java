@@ -56,7 +56,7 @@ public class CampaignController {
 	}
 
 	@Operation(summary = "Get User Detail List With Pagination", description = "This API Provide User Details List with pagination <br>Filters List: "
-			+ "<br>&#9679; VENDOR_ID_IN   <br>&#9679; ACCOUNT_ID_IN  <br>&#9679; USER_ID_IN <br>&#9679; SKILL_IN <br>&#9679; USER_NAME <br>&#9679; EXPERIENCE_IN", responses = {
+			+ "<br>&#9679; CREATED_BY   <br>&#9679; USER_ID_IN ", responses = {
 					@ApiResponse(responseCode = "200", description = "OK.", content = {
 							@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = CampaignInfoDto.class)) }),
 					@ApiResponse(responseCode = "406", description = "NOT Acceptable", content = {
