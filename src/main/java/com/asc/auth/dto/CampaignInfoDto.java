@@ -27,10 +27,9 @@ public class CampaignInfoDto extends UserDateAudit {
 	private Integer reach;
 	private Integer clicks;
 	private BigDecimal spent;
-	private List<AssociateUserDto> associtedUsers = new ArrayList<>();
+	private List<AssociateUserDto> associatedUsers  = new ArrayList<>();
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-
 	@Setter
 	@Getter
 	@NoArgsConstructor

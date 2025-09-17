@@ -46,5 +46,5 @@ public class CampaignInfo extends UserDateAudit {
 	@JsonManagedReference
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "campaign", cascade = { CascadeType.ALL })
 	@EqualsAndHashCode.Exclude
-	private List<AssociateUser> associtedUsers = new ArrayList<>();
+	private List<AssociateUser> associatedUsers  = new ArrayList<>();
 }

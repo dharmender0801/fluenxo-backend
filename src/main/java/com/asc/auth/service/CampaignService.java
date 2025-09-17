@@ -48,11 +48,12 @@ public class CampaignService {
 	}
 
 	private Object associateUser(CampaignInfoDto campaignInfoDto, CampaignInfo campaignInfo) {
-		Map<Long, AssociateUser> existingUserMap = campaignInfo.getAssocitedUsers().stream()
+		log.info("User : {} ", campaignInfoDto.getAssociatedUsers());
+		Map<Long, AssociateUser> existingUserMap = campaignInfo.getAssociatedUsers().stream()
 				.collect(Collectors.toMap(AssociateUser::getId, Function.identity()));
-		return campaignInfoDto.getAssocitedUsers().stream().map(user -> {
+		return campaignInfoDto.getAssociatedUsers().stream().map(user -> {
 			AssociateUser associateUser;
-			if (Objects.nonNull(user.getId())) {
+			if (user.getId() != null) {
 				associateUser = existingUserMap.get(user.getId());
 				Utils.copyProperties(user, associateUser);
 				return associateUser;
@@ -60,7 +61,7 @@ public class CampaignService {
 				associateUser = new AssociateUser();
 				Utils.copyProperties(user, associateUser);
 				associateUser.setCampaign(campaignInfo);
-				campaignInfo.getAssocitedUsers().add(associateUser);
+				campaignInfo.getAssociatedUsers().add(associateUser);
 				return associateUser;
 			}
 		}).collect(Collectors.toList());
