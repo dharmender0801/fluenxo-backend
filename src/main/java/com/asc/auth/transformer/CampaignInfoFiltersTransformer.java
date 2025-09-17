@@ -33,7 +33,7 @@ public class CampaignInfoFiltersTransformer {
 
 	private static void filterByUserIdIn(QuerySpecificationBuilder qb, FilterKeys key, String value) {
 		if (FilterKeys.USER_ID_IN.equals(key) && Objects.nonNull(value)) {
-			qb.with("createdBy", SearchOperation.LONGIN, value);
+			qb.with("associtedUsers", Arrays.asList("userId"), SearchOperation.JOIN_MULTI_LONG_LIST_IN, value);
 		}
 
 	}

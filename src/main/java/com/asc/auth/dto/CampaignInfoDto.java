@@ -1,6 +1,8 @@
 package com.asc.auth.dto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.asc.auth.model.audit.UserDateAudit;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,5 +27,16 @@ public class CampaignInfoDto extends UserDateAudit {
 	private Integer reach;
 	private Integer clicks;
 	private BigDecimal spent;
-	
+	private List<AssociateUserDto> associtedUsers = new ArrayList<>();
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+
+	@Setter
+	@Getter
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class AssociateUserDto extends UserDateAudit {
+		private Long id;
+		private Long userId;
+	}
 }

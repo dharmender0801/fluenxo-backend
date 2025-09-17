@@ -2,7 +2,9 @@ package com.asc.auth.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.asc.auth.dto.CampaignInfoDto;
 import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.exception.RecordNotFoundException;
+import com.asc.auth.model.AssociateUser;
 import com.asc.auth.model.CampaignInfo;
 import com.asc.auth.repository.CampaignInfoRepository;
 import com.asc.auth.transformer.CampaignInfoFiltersTransformer;
@@ -35,12 +38,32 @@ public class CampaignService {
 			CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignInfoDto.getId())
 					.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
 			Utils.copyProperties(campaignInfoDto, campaignInfo);
+			log.info("adding User : {} ", associateUser(campaignInfoDto, campaignInfo));
 			return copyEntitytoDto(saveCampaign(campaignInfo));
 		} else {
 			CampaignInfo campaignInfo = new CampaignInfo();
 			Utils.copyProperties(campaignInfoDto, campaignInfo);
 			return copyEntitytoDto(saveCampaign(campaignInfo));
 		}
+	}
+
+	private Object associateUser(CampaignInfoDto campaignInfoDto, CampaignInfo campaignInfo) {
+		Map<Long, AssociateUser> existingUserMap = campaignInfo.getAssocitedUsers().stream()
+				.collect(Collectors.toMap(AssociateUser::getId, Function.identity()));
+		return campaignInfoDto.getAssocitedUsers().stream().map(user -> {
+			AssociateUser associateUser;
+			if (Objects.nonNull(user.getId())) {
+				associateUser = existingUserMap.get(user.getId());
+				Utils.copyProperties(user, associateUser);
+				return associateUser;
+			} else {
+				associateUser = new AssociateUser();
+				Utils.copyProperties(user, associateUser);
+				associateUser.setCampaign(campaignInfo);
+				campaignInfo.getAssocitedUsers().add(associateUser);
+				return associateUser;
+			}
+		}).collect(Collectors.toList());
 	}
 
 	private CampaignInfoDto copyEntitytoDto(CampaignInfo saveCampaign) {
