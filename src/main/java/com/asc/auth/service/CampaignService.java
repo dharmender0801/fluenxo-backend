@@ -48,10 +48,10 @@ public class CampaignService {
 	}
 
 	private Object associateUser(CampaignInfoDto campaignInfoDto, CampaignInfo campaignInfo) {
-		log.info("User : {} ", campaignInfoDto.getAssociatedUsers());
+		log.info("User : {} ", campaignInfoDto.getAssociatedUser());
 		Map<Long, AssociateUser> existingUserMap = campaignInfo.getAssociatedUsers().stream()
 				.collect(Collectors.toMap(AssociateUser::getId, Function.identity()));
-		return campaignInfoDto.getAssociatedUsers().stream().map(user -> {
+		return campaignInfoDto.getAssociatedUser().stream().map(user -> {
 			AssociateUser associateUser;
 			if (user.getId() != null) {
 				associateUser = existingUserMap.get(user.getId());

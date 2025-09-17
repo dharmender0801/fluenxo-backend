@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.asc.auth.model.audit.UserDateAudit;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +28,8 @@ public class CampaignInfoDto extends UserDateAudit {
 	private Integer reach;
 	private Integer clicks;
 	private BigDecimal spent;
-	private List<AssociateUserDto> associatedUsers  = new ArrayList<>();
+	@JsonProperty("associatedUsers")
+	private List<AssociateUserDto> associatedUser  = new ArrayList<>();
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@Setter

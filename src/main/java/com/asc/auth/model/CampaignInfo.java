@@ -44,7 +44,7 @@ public class CampaignInfo extends UserDateAudit {
 	private BigDecimal spent;
 
 	@JsonManagedReference
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "campaign", cascade = { CascadeType.ALL })
+	@OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
 	@EqualsAndHashCode.Exclude
 	private List<AssociateUser> associatedUsers  = new ArrayList<>();
 }
