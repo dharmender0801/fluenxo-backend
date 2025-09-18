@@ -68,7 +68,7 @@ public class SecurityConfig {
 								.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**",
 										"/swagger-ui/**", "/webjars/**", "/csrf**/**", "/templates/**", "/index.html**",
 										"/configuration/ui", "/configuration/security", "/auth/**", "/login/**",
-										"/oauth2/**", "/oauth2/authorization/**")
+										"/oauth2/**", "/oauth2/authorization/**", "/track/**")
 								.permitAll().anyRequest().authenticated())
 				.sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())

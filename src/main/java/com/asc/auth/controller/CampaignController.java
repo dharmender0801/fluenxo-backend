@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.asc.auth.dto.CampaignInfoDto;
 import com.asc.auth.dto.FiltersDto;
-import com.asc.auth.dto.UserDto;
 import com.asc.auth.model.enums.DeviceType;
 import com.asc.auth.service.CampaignService;
 import com.asc.auth.utils.Constants;
