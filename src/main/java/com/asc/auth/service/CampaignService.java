@@ -19,11 +19,14 @@ import com.asc.auth.dto.CampaignInfoDto;
 import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.exception.RecordNotFoundException;
 import com.asc.auth.model.AssociateUser;
+import com.asc.auth.model.CampaignClickInfo;
 import com.asc.auth.model.CampaignInfo;
+import com.asc.auth.repository.CampaignClickInfoRepository;
 import com.asc.auth.repository.CampaignInfoRepository;
 import com.asc.auth.transformer.CampaignInfoFiltersTransformer;
 import com.asc.auth.utils.Utils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -32,6 +35,9 @@ public class CampaignService {
 
 	@Autowired
 	CampaignInfoRepository campaignInfoRepository;
+
+	@Autowired
+	CampaignClickInfoRepository campaignClickInfoRepository;
 
 	public CampaignInfoDto addOrUpdate(CampaignInfoDto campaignInfoDto) {
 		if (Objects.nonNull(campaignInfoDto.getId())) {
@@ -95,6 +101,41 @@ public class CampaignService {
 
 		}
 		return null;
+	}
+
+	public String getRedirectUrl(Long campaignId, Long userId, HttpServletRequest request) {
+		String ip = request.getHeader("X-Forwarded-For");
+		log.info("IP :{} ", ip);
+		if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+			ip = ip.split(",")[0].trim();
+		} else {
+			ip = request.getHeader("X-Real-IP");
+			log.info("IP :{} ", ip);
+			if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getRemoteAddr();
+			}
+		}
+		log.info("IP :{} ", ip);
+		String referrer = request.getHeader("Referer");
+		String userAgent = request.getHeader("User-Agent");
+		String deviceType = (userAgent != null && userAgent.toLowerCase().contains("mobile")) ? "MOBILE" : "DESKTOP";
+		CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignId)
+				.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
+		saveTrackings(campaignInfo, userId, request.getRemoteAddr(), referrer, userAgent, deviceType);
+		return campaignInfo.getCampaignLink();
+	}
+
+	private void saveTrackings(CampaignInfo campaignInfo, Long userId, String ip, String referrer, String userAgent,
+			String deviceType) {
+		CampaignClickInfo campaignClickInfo = new CampaignClickInfo();
+		campaignClickInfo.setCampaignId(campaignInfo.getId());
+		campaignClickInfo.setDeviceId(deviceType);
+		campaignClickInfo.setInfluencerId(userId);
+		campaignClickInfo.setIpAddress(ip);
+		campaignClickInfo.setReferer(referrer);
+		campaignClickInfo.setUserAgent(userAgent);
+		log.info("saving Request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
+
 	}
 
 }
