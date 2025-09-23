@@ -20,6 +20,7 @@ import org.springframework.ui.Model;
 
 import com.asc.auth.dto.CampaignClickInfoDto;
 import com.asc.auth.dto.CampaignInfoDto;
+import com.asc.auth.dto.CampaignInfoDto.AssociateUserDto;
 import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.exception.RecordNotFoundException;
 import com.asc.auth.model.AssociateUser;
@@ -80,6 +81,12 @@ public class CampaignService {
 	private CampaignInfoDto copyEntitytoDto(CampaignInfo saveCampaign) {
 		CampaignInfoDto campaignInfoDto = new CampaignInfoDto();
 		Utils.copyProperties(saveCampaign, campaignInfoDto);
+		List<AssociateUserDto> associateUserDtos = saveCampaign.getAssociatedUsers().stream().map(user -> {
+			AssociateUserDto associateUserDto = new AssociateUserDto();
+			Utils.copyProperties(user, associateUserDto);
+			return associateUserDto;
+		}).collect(Collectors.toList());
+		campaignInfoDto.setAssociatedUser(associateUserDtos);
 		return campaignInfoDto;
 	}
 
