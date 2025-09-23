@@ -25,4 +25,12 @@ public class CampaignClickInfoDto extends UserDateAudit {
 	private String longitude;
 	private String referer;
 	private Long influencerId;
+	private String connectionType;
+	private String deviceRam;
+	private String deviceCpuCore;
+	private String networkAsn;
+	private String networkCity;
+	private String networkRegion;
+	private String networkCountry;
+	private String networkTimezone;
 }

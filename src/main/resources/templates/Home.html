@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <style>
+        /* Simple loading screen */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loader">
+        <div class="spinner"></div>
+        <div>Loading, please wait...</div>
+    </div>
+    <script th:inline="javascript">
+
+        const clickId = '[[${clickId}]]'; // Campaign ID from Thymeleaf
+        const redirectUrl = [[${ redirectUrl }]];
+
+        async function getIPInfo() {
+            try {
+                const res = await fetch("https://ipapi.co/json/");
+                return await res.json();
+            } catch {
+                return {};
+            }
+        }
+
+        function getGPUInfo() {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return { vendor: "Unavailable", renderer: "Unavailable" };
+            const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+            if (!dbg) return { vendor: "Unavailable", renderer: "Unavailable" };
+            return {
+                vendor: gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL),
+                renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+            };
+        }
+
+        async function getBatteryInfo() {
+            try {
+                const battery = await navigator.getBattery();
+                return {
+                    level: Math.round(battery.level * 100) + "%",
+                    charging: battery.charging ? true : false
+                };
+            } catch {
+                return { level: "Unavailable", charging: "Unavailable" };
+            }
+        }
+
+        async function collectInfo(referer = "", influencerId = null) {
+            const ipInfo = await getIPInfo();
+            const battery = await getBatteryInfo();
+            const gpu = getGPUInfo();
+
+            return {
+                id: clickId,
+                ipAddress: ipInfo.ip || null,
+                userAgent: navigator.userAgent,
+                deviceId: navigator.userAgentData?.model || null,
+                deviceModel: navigator.userAgentData?.model || null,
+                screenSize: `${screen.width}x${screen.height}`,
+                operator: ipInfo.org || null,
+                latitude: ipInfo.latitude ? ipInfo.latitude.toString() : null,
+                longitude: ipInfo.longitude ? ipInfo.longitude.toString() : null,
+                referer: referer || document.referrer || null,
+                connectionType: navigator.connection ? navigator.connection.effectiveType : null,
+                deviceRam: navigator.deviceMemory ? navigator.deviceMemory + " GB" : null,
+                deviceCpuCore: navigator.hardwareConcurrency ? navigator.hardwareConcurrency.toString() : null,
+                networkAsn: ipInfo.asn || null,
+                networkCity: ipInfo.city || null,
+                networkRegion: ipInfo.region || null,
+                networkCountry: ipInfo.country_name || null,
+                networkTimezone: ipInfo.timezone || null,
+                gpuVendor: gpu.vendor,
+                gpuRenderer: gpu.renderer,
+                batteryLevel: battery.level,
+                batteryCharging: battery.charging
+            };
+        }
+
+        async function sendInfoToBackend(info) {
+            try {
+                const res = await fetch('/backend-service/track/updateClick', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(info)
+                });
+                if (res.ok) {
+                    console.log("System info sent successfully!");
+                } else {
+                    console.error("Failed to send system info. Status:", res.status);
+                }
+            } catch (err) {
+                console.error("Error sending system info:", err);
+            } finally {
+
+            }
+        }
+
+        async function showAndSendInfo() {
+            const info = await collectInfo();
+            try {
+                await sendInfoToBackend(info);
+            } catch (err) {
+                console.error("Error sending info:", err);
+            } finally {
+                window.location.href = redirectUrl;
+            }
+        }
+        showAndSendInfo();
+
+    </script>
+</body>
+
+</html>

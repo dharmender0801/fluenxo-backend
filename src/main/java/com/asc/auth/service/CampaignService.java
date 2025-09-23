@@ -1,6 +1,7 @@
 package com.asc.auth.service;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,8 +14,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
+import com.asc.auth.dto.CampaignClickInfoDto;
 import com.asc.auth.dto.CampaignInfoDto;
 import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.exception.RecordNotFoundException;
@@ -103,7 +107,7 @@ public class CampaignService {
 		return null;
 	}
 
-	public String getRedirectUrl(Long campaignId, Long userId, HttpServletRequest request) {
+	public String getRedirectUrl(Long campaignId, Long userId, HttpServletRequest request, Model model) {
 		String ip = request.getHeader("X-Forwarded-For");
 		log.info("IP :{} ", ip);
 		if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
@@ -121,12 +125,12 @@ public class CampaignService {
 		String deviceType = (userAgent != null && userAgent.toLowerCase().contains("mobile")) ? "MOBILE" : "DESKTOP";
 		CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignId)
 				.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
-		saveTrackings(campaignInfo, userId, request.getRemoteAddr(), referrer, userAgent, deviceType);
+		saveTrackings(campaignInfo, userId, request.getRemoteAddr(), referrer, userAgent, deviceType, model);
 		return campaignInfo.getCampaignLink();
 	}
 
 	private void saveTrackings(CampaignInfo campaignInfo, Long userId, String ip, String referrer, String userAgent,
-			String deviceType) {
+			String deviceType, Model model) {
 		CampaignClickInfo campaignClickInfo = new CampaignClickInfo();
 		campaignClickInfo.setCampaignId(campaignInfo.getId());
 		campaignClickInfo.setDeviceId(deviceType);
@@ -134,7 +138,18 @@ public class CampaignService {
 		campaignClickInfo.setIpAddress(ip);
 		campaignClickInfo.setReferer(referrer);
 		campaignClickInfo.setUserAgent(userAgent);
-		log.info("saving Request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
+		campaignClickInfo = campaignClickInfoRepository.save(campaignClickInfo);
+		log.info("saving Request : {} ", campaignClickInfo);
+		model.addAttribute("clickId", campaignClickInfo.getId());
+
+	}
+
+	@Async
+	public void updateCampaignClick(CampaignClickInfoDto campaignClickInfoDto) {
+		CampaignClickInfo campaignClickInfo = campaignClickInfoRepository.findById(campaignClickInfoDto.getId())
+				.orElseThrow(() -> new RecordNotFoundException("No Campaign Click Found "));
+		Utils.copyProperties(campaignClickInfoDto, campaignClickInfo);
+		log.info("updating click request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
 
 	}
 
