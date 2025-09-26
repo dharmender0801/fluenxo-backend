@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.configuration.SpringDocKotlinConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,10 +18,10 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = SpringDocKotlinConfiguration.class)
 @EnableAutoConfiguration
 @EnableJpaRepositories
 @EnableWebMvc
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableAsync
+@OpenAPIDefinition
 public class AuthServiceApplication {
 
 	public static final String PROPERTIES_LOCATION_ENV = "spring.config.location";

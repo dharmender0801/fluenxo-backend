@@ -1,7 +1,7 @@
 package com.asc.auth.service;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -158,6 +158,41 @@ public class CampaignService {
 		Utils.copyProperties(campaignClickInfoDto, campaignClickInfo);
 		log.info("updating click request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
 
+	}
+
+	public Map<String, Object> getJson() {
+		List<Object[]> rows = campaignClickInfoRepository.getAllMetrics();
+		Map<String, List<Map<String, Object>>> result = new HashMap<>();
+		result.put("campaign_totals", new ArrayList<>());
+		result.put("influencer_totals", new ArrayList<>());
+		result.put("device_totals", new ArrayList<>());
+		result.put("city_totals", new ArrayList<>());
+		for (Object[] row : rows) {
+			String type = (String) row[0];
+			Map<String, Object> map = new HashMap<>();
+			map.put("campaign_id", row[1]);
+			map.put("influencer_id", row[2]);
+			map.put("city", row[3]);
+			map.put("device", row[4]);
+			map.put("total_clicks", row[5]);
+			map.put("total_reach", row[6]);
+
+			switch (type) {
+			case "campaign_total":
+				result.get("campaign_totals").add(map);
+				break;
+			case "influencer_total":
+				result.get("influencer_totals").add(map);
+				break;
+			case "device_total":
+				result.get("device_totals").add(map);
+				break;
+			case "city_total":
+				result.get("city_totals").add(map);
+				break;
+			}
+		}
+		return (Map) result;
 	}
 
 }

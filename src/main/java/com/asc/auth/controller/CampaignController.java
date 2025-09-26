@@ -1,6 +1,7 @@
 package com.asc.auth.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,15 @@ public class CampaignController {
 				direction);
 		return pageList != null && !pageList.isEmpty()
 				? RestUtils.successResponse(pageList, Constants.SUCCESS, HttpStatus.OK)
+				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
+	}
+
+	@PostMapping(path = "/getJson", produces = "application/json")
+	public ResponseEntity<RestResponse<Map<String, Object>>> getJson(
+			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
+			@RequestHeader(name = Constants.APP_VERSION) String appVersion) {
+		Map<String, Object> json = campaignService.getJson();
+		return Objects.nonNull(json) ? RestUtils.successResponse(json, Constants.SUCCESS, HttpStatus.OK)
 				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
 	}
 
