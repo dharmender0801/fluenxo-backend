@@ -113,4 +113,24 @@ public class WalletController {
 				? RestUtils.successResponse(pageList, Constants.SUCCESS, HttpStatus.OK)
 				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
 	}
+
+	@Operation(summary = "Get User Detail List With Pagination", description = "This API Provide User Details List with pagination <br>Filters List: "
+			+ "<br>&#9679; CREATED_BY   <br>&#9679; USER_ID_IN ", responses = {
+					@ApiResponse(responseCode = "200", description = "OK.", content = {
+							@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = WalletTransactionDto.class)) }),
+					@ApiResponse(responseCode = "406", description = "NOT Acceptable", content = {
+							@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = String.class)) }) })
+	@PostMapping(path = "/getReachargeLogs", produces = "application/json")
+	public ResponseEntity<RestResponse<Page<PaymentLogDto>>> getReachargeLogs(
+			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
+			@RequestHeader(name = Constants.APP_VERSION) String appVersion,
+			@RequestBody(required = false) List<FiltersDto> filters, @RequestParam(required = true) Integer pageNumber,
+			@RequestParam(required = true) Integer pageSize, @RequestParam(required = false) String sortingColumn,
+			@RequestParam(required = false) Direction direction) throws Exception {
+		Page<PaymentLogDto> pageList = paymentService.getReachargeLogs(filters, pageNumber, pageSize, sortingColumn,
+				direction);
+		return pageList != null && !pageList.isEmpty()
+				? RestUtils.successResponse(pageList, Constants.SUCCESS, HttpStatus.OK)
+				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
+	}
 }
