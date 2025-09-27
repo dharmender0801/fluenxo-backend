@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +33,9 @@ public class RazorpayService {
 	PaymentLogRepository paymentLogRepository;
 	@Value("${razorpay.key.id}")
 	String razorpaykeys;
+
+	@Value("${razorpay.secret.key}")
+	String razorpaySecreteValue;
 
 	public RazorpayService(@Value("${razorpay.key.id}") String razorpayKey,
 			@Value("${razorpay.secret.key}") String razorpaySecret) throws RazorpayException {
@@ -59,7 +66,19 @@ public class RazorpayService {
 		return response;
 	}
 
-	public Payment fetchPayment(String paymentId) throws RazorpayException {
-		return client.payments.fetch(paymentId);
+	public boolean verifyPayment(String orderId, String paymentId, String paymentSignature) throws Exception {
+		String generatedSignature = calculateSignature(orderId, paymentId);
+		log.info("Generated Value : {} , Payment Signature : {}", generatedSignature, paymentSignature);
+		return generatedSignature.equals(paymentSignature);
+
+	}
+
+	private String calculateSignature(String orderId, String paymentId) throws Exception {
+		String payload = orderId + "|" + paymentId;
+		Mac mac = Mac.getInstance("HmacSHA256");
+		SecretKeySpec secretKeySpec = new SecretKeySpec(razorpaySecreteValue.getBytes(), "HmacSHA256");
+		mac.init(secretKeySpec);
+		byte[] hash = mac.doFinal(payload.getBytes());
+		return Hex.encodeHexString(hash);
 	}
 }
