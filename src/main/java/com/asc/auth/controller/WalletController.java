@@ -1,9 +1,12 @@
 package com.asc.auth.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +14,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.asc.auth.dto.CampaignInfoDto;
+import com.asc.auth.dto.FiltersDto;
 import com.asc.auth.dto.PaymentLogDto;
 import com.asc.auth.dto.WalletDto;
+import com.asc.auth.dto.WalletTransactionDto;
 import com.asc.auth.model.enums.DeviceType;
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.service.PaymentService;
@@ -87,4 +94,23 @@ public class WalletController {
 				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
 	}
 
+	@Operation(summary = "Get User Detail List With Pagination", description = "This API Provide User Details List with pagination <br>Filters List: "
+			+ "<br>&#9679; CREATED_BY   <br>&#9679; USER_ID_IN ", responses = {
+					@ApiResponse(responseCode = "200", description = "OK.", content = {
+							@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = WalletTransactionDto.class)) }),
+					@ApiResponse(responseCode = "406", description = "NOT Acceptable", content = {
+							@Content(mediaType = "application/json", schema = @Schema(type = "object", implementation = String.class)) }) })
+	@PostMapping(path = "/getTransactions", produces = "application/json")
+	public ResponseEntity<RestResponse<Page<WalletTransactionDto>>> WalletTransactionDto(
+			@RequestHeader(name = Constants.DEVICE_TYPE) DeviceType deviceType,
+			@RequestHeader(name = Constants.APP_VERSION) String appVersion,
+			@RequestBody(required = false) List<FiltersDto> filters, @RequestParam(required = true) Integer pageNumber,
+			@RequestParam(required = true) Integer pageSize, @RequestParam(required = false) String sortingColumn,
+			@RequestParam(required = false) Direction direction) throws Exception {
+		Page<WalletTransactionDto> pageList = walletService.geTransactions(filters, pageNumber, pageSize, sortingColumn,
+				direction);
+		return pageList != null && !pageList.isEmpty()
+				? RestUtils.successResponse(pageList, Constants.SUCCESS, HttpStatus.OK)
+				: RestUtils.errorResponse(null, Constants.NOT_FOUND, HttpStatus.NOT_FOUND);
+	}
 }
