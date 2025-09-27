@@ -36,24 +36,22 @@ public class PaymentService {
 				.orElseThrow(() -> new RecordNotFoundException("Order not found"));
 		if (razorpayService.verifyPayment(paymentLogDto.getOrderId(), paymentLogDto.getPaymentId(),
 				paymentLogDto.getRazorpaySignature())) {
-			log.setPaymentId(paymentLogDto.getPaymentId());
-			log.setStatus(TransactionType.CREDIT);
-			paymentLogRepository.save(log);
-
 			Wallet wallet = walletRepository.findByUserId(log.getUserId()).orElseGet(() -> walletRepository
 					.save(Wallet.builder().userId(log.getUserId()).balance(BigDecimal.ZERO).build()));
 			wallet.setBalance(wallet.getBalance().add(log.getAmount()));
 			walletRepository.save(wallet);
-
 			WalletTransaction tx = new WalletTransaction();
 			tx.setWallet(wallet);
 			tx.setAmount(log.getAmount());
 			tx.setType(TransactionType.CREDIT);
 			tx.setReference("Razorpay Payment: " + paymentLogDto.getPaymentId());
 			walletTransactionRepository.save(tx);
-			return copyEntityInDto(log);
+
 		}
-		return null;
+		log.setPaymentId(paymentLogDto.getPaymentId());
+		log.setStatus(paymentLogDto.getStatus());
+		paymentLogRepository.save(log);
+		return copyEntityInDto(log);
 	}
 
 	private PaymentLogDto copyEntityInDto(PaymentLog log) {
