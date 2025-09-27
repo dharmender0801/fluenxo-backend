@@ -48,8 +48,7 @@ public class PaymentService {
 			walletTransactionRepository.save(tx);
 
 		}
-		log.setPaymentId(paymentLogDto.getPaymentId());
-		log.setStatus(paymentLogDto.getStatus());
+		Utils.copyProperties(paymentLogDto, log);
 		paymentLogRepository.save(log);
 		return copyEntityInDto(log);
 	}
