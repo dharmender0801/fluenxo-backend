@@ -174,7 +174,7 @@ public class CampaignService {
 		log.info("updating click request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
 		long count = campaignClickInfoRepository.countByIpAddressAndDeviceId(campaignClickInfoDto.getIpAddress(),
 				campaignClickInfoDto.getDeviceId());
-		if (count == 1) {
+		if (count < 2) {
 			CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignClickInfo.getCampaignId())
 					.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
 			Map<Long, AssociateUser> userMap = campaignInfo.getAssociatedUsers().stream()
