@@ -1,5 +1,7 @@
 package com.asc.auth.model;
 
+import java.math.BigDecimal;
+
 import com.asc.auth.model.audit.UserDateAudit;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +32,7 @@ public class AssociateUser extends UserDateAudit {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private Long userId;
+	private BigDecimal cpc;
 
 	@JsonBackReference
 	@ToString.Exclude

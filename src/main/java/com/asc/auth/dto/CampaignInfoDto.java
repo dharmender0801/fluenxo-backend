@@ -28,8 +28,10 @@ public class CampaignInfoDto extends UserDateAudit {
 	private Integer reach;
 	private Integer clicks;
 	private BigDecimal spent;
+	private BigDecimal cpc;
+	private String remarks;
 	@JsonProperty("associatedUsers")
-	private List<AssociateUserDto> associatedUser  = new ArrayList<>();
+	private List<AssociateUserDto> associatedUser = new ArrayList<>();
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@Setter
@@ -39,5 +41,6 @@ public class CampaignInfoDto extends UserDateAudit {
 	public static class AssociateUserDto extends UserDateAudit {
 		private Long id;
 		private Long userId;
+		private BigDecimal cpc;
 	}
 }

@@ -31,9 +31,7 @@ public class CampaignTrackerController {
 	@GetMapping("/{campaignId}/click")
 	public String trackClick(@PathVariable Long campaignId, @RequestParam(required = false) Long userId,
 			HttpServletRequest request, Model model) {
-		String redirectUrl = campaignService.getRedirectUrl(campaignId, userId, request, model);
-		model.addAttribute("redirectUrl", redirectUrl);
-		return "Home";
+		return campaignService.getRedirectUrl(campaignId, userId, request, model);
 	}
 
 	@PostMapping("/updateClick")

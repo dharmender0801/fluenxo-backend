@@ -4,10 +4,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.asc.auth.config.CampaignStatusConverter;
+import com.asc.auth.config.TransactionTypeConverter;
 import com.asc.auth.model.audit.UserDateAudit;
+import com.asc.auth.model.enums.CampaignStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -38,13 +43,17 @@ public class CampaignInfo extends UserDateAudit {
 	private String image;
 	private String campaignLink;
 	private BigDecimal budget;
-	private Integer status;
+	@Convert(converter = CampaignStatusConverter.class)
+	@Column(columnDefinition = "int")
+	private CampaignStatus status;
 	private Integer reach;
 	private Integer clicks;
 	private BigDecimal spent;
+	private BigDecimal cpc;
+	private String remarks;
 
 	@JsonManagedReference
 	@OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
 	@EqualsAndHashCode.Exclude
-	private List<AssociateUser> associatedUsers  = new ArrayList<>();
+	private List<AssociateUser> associatedUsers = new ArrayList<>();
 }

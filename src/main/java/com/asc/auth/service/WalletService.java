@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,14 @@ import com.asc.auth.dto.WalletDto;
 import com.asc.auth.dto.WalletTransactionDto;
 import com.asc.auth.model.Wallet;
 import com.asc.auth.model.WalletTransaction;
+import com.asc.auth.model.enums.TransactionType;
 import com.asc.auth.repository.WalletRepository;
 import com.asc.auth.repository.WalletTransactionRepository;
 import com.asc.auth.security.TokenFilter;
 import com.asc.auth.transformer.WalletTransactionFiltersTransformer;
 import com.asc.auth.utils.Utils;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -50,6 +53,11 @@ public class WalletService {
 		return walletDto;
 	}
 
+	public List<WalletDto> getWalletListByUserIds(Set<Long> userIds) {
+		List<Wallet> wallets = walletRepository.findAllByUserIdIn(userIds);
+		return wallets.stream().map(this::copyEntityToDto).collect(Collectors.toList());
+	}
+
 	public WalletDto recharge(WalletDto walletDto) {
 		// TODO Auto-generated method stub
 		return null;
@@ -60,6 +68,28 @@ public class WalletService {
 		Utils.copyProperties(walletTransaction, transactionDto);
 		return transactionDto;
 
+	}
+
+	@Transactional
+	public WalletDto applyTransaction(Long userId, BigDecimal amount, TransactionType type, String reference) {
+		Wallet wallet = walletRepository.findByUserId(userId).orElseGet(
+				() -> walletRepository.save(Wallet.builder().userId(userId).balance(BigDecimal.ZERO).build()));
+		if (TransactionType.DEBIT.equals(type)) {
+			if (wallet.getBalance().compareTo(amount) < 0) {
+				throw new RuntimeException("Insufficient balance");
+			}
+			wallet.setBalance(wallet.getBalance().subtract(amount));
+		} else {
+			wallet.setBalance(wallet.getBalance().add(amount));
+		}
+		walletRepository.save(wallet);
+		WalletTransaction tx = new WalletTransaction();
+		tx.setWallet(wallet);
+		tx.setAmount(amount);
+		tx.setType(type);
+		tx.setReference(reference);
+		walletTransactionRepository.save(tx);
+		return copyEntityToDto(wallet);
 	}
 
 	public Page<WalletTransactionDto> geTransactions(List<FiltersDto> filters, Integer pageNumber, Integer pageSize,

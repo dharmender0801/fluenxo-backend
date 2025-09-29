@@ -1,5 +1,6 @@
 package com.asc.auth.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +27,12 @@ import com.asc.auth.exception.RecordNotFoundException;
 import com.asc.auth.model.AssociateUser;
 import com.asc.auth.model.CampaignClickInfo;
 import com.asc.auth.model.CampaignInfo;
+import com.asc.auth.model.enums.CampaignStatus;
+import com.asc.auth.model.enums.TransactionType;
 import com.asc.auth.repository.CampaignClickInfoRepository;
 import com.asc.auth.repository.CampaignInfoRepository;
 import com.asc.auth.transformer.CampaignInfoFiltersTransformer;
+import com.asc.auth.utils.Constants;
 import com.asc.auth.utils.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,6 +47,9 @@ public class CampaignService {
 
 	@Autowired
 	CampaignClickInfoRepository campaignClickInfoRepository;
+
+	@Autowired
+	WalletService walletService;
 
 	public CampaignInfoDto addOrUpdate(CampaignInfoDto campaignInfoDto) {
 		if (Objects.nonNull(campaignInfoDto.getId())) {
@@ -115,6 +122,14 @@ public class CampaignService {
 	}
 
 	public String getRedirectUrl(Long campaignId, Long userId, HttpServletRequest request, Model model) {
+		CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignId)
+				.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
+		if (CampaignStatus.PAUSE.equals(campaignInfo.getStatus())
+				|| CampaignStatus.INACTIVE.equals(campaignInfo.getStatus())) {
+			log.info("Campaign is not active. Skipping click update for campaignId: {}", campaignInfo.getId());
+			return "Pause";
+		}
+
 		String ip = request.getHeader("X-Forwarded-For");
 		log.info("IP :{} ", ip);
 		if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
@@ -130,10 +145,10 @@ public class CampaignService {
 		String referrer = request.getHeader("Referer");
 		String userAgent = request.getHeader("User-Agent");
 		String deviceType = (userAgent != null && userAgent.toLowerCase().contains("mobile")) ? "MOBILE" : "DESKTOP";
-		CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignId)
-				.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
 		saveTrackings(campaignInfo, userId, request.getRemoteAddr(), referrer, userAgent, deviceType, model);
-		return campaignInfo.getCampaignLink();
+		model.addAttribute("redirectUrl", campaignInfo.getCampaignLink());
+//		return campaignInfo.getCampaignLink();
+		return "Home";
 	}
 
 	private void saveTrackings(CampaignInfo campaignInfo, Long userId, String ip, String referrer, String userAgent,
@@ -157,6 +172,39 @@ public class CampaignService {
 				.orElseThrow(() -> new RecordNotFoundException("No Campaign Click Found "));
 		Utils.copyProperties(campaignClickInfoDto, campaignClickInfo);
 		log.info("updating click request : {} ", campaignClickInfoRepository.save(campaignClickInfo));
+		long count = campaignClickInfoRepository.countByIpAddressAndDeviceId(campaignClickInfoDto.getIpAddress(),
+				campaignClickInfoDto.getDeviceId());
+		if (count == 1) {
+			CampaignInfo campaignInfo = campaignInfoRepository.findById(campaignClickInfo.getCampaignId())
+					.orElseThrow(() -> new RecordNotFoundException("No Campaign found "));
+			Map<Long, AssociateUser> userMap = campaignInfo.getAssociatedUsers().stream()
+					.collect(Collectors.toMap(AssociateUser::getUserId, Function.identity()));
+			AssociateUser associateUser = userMap.get(campaignClickInfo.getInfluencerId());
+			if (associateUser == null) {
+				log.warn("Influencer not associated with campaign: {}", campaignClickInfo.getInfluencerId());
+				return;
+			}
+			BigDecimal costForBrands = campaignInfo.getCpc();
+			BigDecimal influencerShare = associateUser.getCpc() != null ? associateUser.getCpc()
+					: campaignInfo.getCpc().multiply(new BigDecimal("0.2"));
+			BigDecimal platformMargin = costForBrands.subtract(influencerShare);
+			try {
+				walletService.applyTransaction(campaignInfo.getCreatedBy(), costForBrands, TransactionType.DEBIT,
+						"Deducted : " + campaignInfo.getId());
+				walletService.applyTransaction(campaignClickInfo.getInfluencerId(), influencerShare,
+						TransactionType.CREDIT, "Influencer reward");
+				walletService.applyTransaction(Constants.ZERO_LONG, platformMargin, TransactionType.CREDIT,
+						"Platform margin");
+			} catch (Exception e) {
+				campaignInfo.setStatus(CampaignStatus.PAUSE);
+				campaignInfo.setRemarks("Campaign Paused Due to : " + e.getMessage());
+				log.info("Campaign Pause : {} ", campaignInfoRepository.save(campaignInfo));
+			}
+
+		} else {
+			log.info("Duplicate click detected for IP: {}, UA: {}. Skipping deduction.",
+					campaignClickInfoDto.getIpAddress(), campaignClickInfoDto.getUserAgent());
+		}
 
 	}
 

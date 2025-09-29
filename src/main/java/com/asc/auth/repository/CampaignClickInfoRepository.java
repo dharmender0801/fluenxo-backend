@@ -18,4 +18,6 @@ public interface CampaignClickInfoRepository extends JpaRepository<CampaignClick
 			+ "SELECT 'city_total', NULL, influencer_id, city, NULL, SUM(clicks), NULL "
 			+ "FROM campaign_audience_summary " + "GROUP BY influencer_id, city", nativeQuery = true)
 	List<Object[]> getAllMetrics();
+
+	long countByIpAddressAndDeviceId(String ipAddress, String deviceId);
 }
