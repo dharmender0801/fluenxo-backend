@@ -53,7 +53,7 @@ public class CampaignInfo extends UserDateAudit {
 	private String remarks;
 
 	@JsonManagedReference
-	@OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@EqualsAndHashCode.Exclude
 	private List<AssociateUser> associatedUsers = new ArrayList<>();
 }
