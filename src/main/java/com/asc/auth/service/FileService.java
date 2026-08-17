@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileService {
 
-	@Value("${file.uploads.base.path:/var/www/html/files/assets/file-uploads/}")
+	@Value("${file.uploads.base.path:/var/www/html/mobin/file-uploads/}")
 	String fileUploadBasePath;
 
 	@Value("${file.access.base.domain.url:https://fluenxo.dharmenderkumar.com/file-uploads/}")

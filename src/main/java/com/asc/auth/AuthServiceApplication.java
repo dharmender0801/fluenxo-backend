@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthServiceApplication {
 
 	public static final String PROPERTIES_LOCATION_ENV = "spring.config.location";
-	public static final String APPLICATION_PROPERTY = "auth-service-application";
-	public static final String ERROR_MESSAGES_PROPERTY = "auth-service-error-messages";
+	public static final String APPLICATION_PROPERTY = "fluenxo-auth-service-application";
+	public static final String ERROR_MESSAGES_PROPERTY = "fluenxo-auth-service-error-messages";
 	protected static final List<String> PROPERTY_FILES = Arrays.asList(APPLICATION_PROPERTY, ERROR_MESSAGES_PROPERTY);
 	public static final String PROPERTIES_FILE_NAME = String.join(",", PROPERTY_FILES);
 
